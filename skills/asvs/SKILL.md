@@ -138,7 +138,7 @@ Chapters: V6, V7, V8 (skipped: V17 no WebRTC)
 
 | Requirement | L | Status | Evidence / finding | CWE |
 |---|---|---|---|---|
-| v5.0.0-6.2.1 | 1 | FAIL | `auth/password.py:42` minimum length is 6 | CWE-521 |
+| v5.0.0-6.2.1 | 1 | FAIL | `auth/password.py:42` minimum length is 6 | [CWE-521](https://cwe.mitre.org/data/definitions/521.html) |
 | v5.0.0-7.2.1 | 1 | PASS | `session.ts:18` tokens validated server side | |
 
 Summary: <n> PASS, <n> FAIL, <n> PARTIAL, <n> N/A, <n> UNVERIFIED
@@ -149,6 +149,8 @@ Top risks
 Missing evidence
 - ...
 ```
+
+In the CWE column, write each CWE as a Markdown link to its MITRE page: `CWE-<ID>` links to `https://cwe.mitre.org/data/definitions/<ID>.html`, where `<ID>` is the number only (so `CWE-78` becomes `[CWE-78](https://cwe.mitre.org/data/definitions/78.html)`). Separate multiple CWEs with a comma, and leave the cell empty when there is no mapping.
 
 For a quick question such as "which requirements apply to X?", skip the table and list the relevant requirement IDs with one-line summaries.
 
