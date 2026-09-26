@@ -1,0 +1,159 @@
+# asvs-v16-rules.yml
+# Verifiable requirements distilled from OWASP ASVS 5.0.0 - V16 Security Logging and Error Handling.
+meta:
+  prefix: "ASVS"
+  standard: "OWASP ASVS 5.0.0"
+  source: "references/0x25-V16-Security-Logging-and-Error-Handling.md"
+  chapter: "V16"
+  title: "Security Logging and Error Handling"
+  requirements: 17
+  per_level: {L1: 0, L2: 16, L3: 1}
+  cwe:
+    mapped: 11
+    mapping: "scripts/asvs-5.0.0-cwe-mapping.yml (derived from OWASP ASVS 5.0.be, indicative only)"
+    catalogs:
+      - "cwe.xml: CWE 4.20 (2026-04-30), VIEW LIST: CWE-699: Software Development"
+      - "cwec_v4.20.xml: CWE 4.20 (2026-04-30), CWE"
+  sections:
+    - id: "V16.1"
+      title: "Security Logging Documentation"
+    - id: "V16.2"
+      title: "General Logging"
+    - id: "V16.3"
+      title: "Security Events"
+    - id: "V16.4"
+      title: "Log Protection"
+    - id: "V16.5"
+      title: "Error Handling"
+rules:
+  - id: "ASVS-V16-16.1.1"
+    section: "V16.1"
+    level: 2
+    rule: "An inventory exists documenting the logging performed at each layer of the application's technology stack, what events are being logged, log formats, where that logging is stored, how it is used, how access to it is controlled, and for how long logs are kept."
+    cwe:
+      id: 778
+      name: "Insufficient Logging"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/778.html"
+      note: "If security critical information is not recorded, there will be no trail for forensic analysis and discovering the cause of problems or the source of attacks may become more difficult or impossible."
+  - id: "ASVS-V16-16.2.1"
+    section: "V16.2"
+    level: 2
+    rule: "Each log entry includes necessary metadata (such as when, where, who, what) that would allow for a detailed investigation of the timeline when an event happens."
+    cwe:
+      id: 778
+      name: "Insufficient Logging"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/778.html"
+      note: "If security critical information is not recorded, there will be no trail for forensic analysis and discovering the cause of problems or the source of attacks may become more difficult or impossible."
+  - id: "ASVS-V16-16.2.2"
+    section: "V16.2"
+    level: 2
+    rule: "Time sources for all logging components are synchronized, and that timestamps in security event metadata use UTC or include an explicit time zone offset. UTC is recommended to ensure consistency across distributed systems and to prevent confusion during daylight saving time transitions."
+  - id: "ASVS-V16-16.2.3"
+    section: "V16.2"
+    level: 2
+    rule: "The application only stores or broadcasts logs to the files and services that are documented in the log inventory."
+  - id: "ASVS-V16-16.2.4"
+    section: "V16.2"
+    level: 2
+    rule: "Logs can be read and correlated by the log processor that is in use, preferably by using a common logging format."
+  - id: "ASVS-V16-16.2.5"
+    section: "V16.2"
+    level: 2
+    rule: "When logging sensitive data, the application enforces logging based on the data's protection level. For example, it may not be allowed to log certain data, such as credentials or payment details. Other data, such as session tokens, may only be logged by being hashed or masked, either in full or partially."
+    cwe:
+      id: 532
+      name: "Insertion of Sensitive Information into Log File"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/532.html"
+      note: "Logging sensitive user data, full path names, or system information often provides attackers with an additional, less-protected path to acquiring the information."
+  - id: "ASVS-V16-16.3.1"
+    section: "V16.3"
+    level: 2
+    rule: "All authentication operations are logged, including successful and unsuccessful attempts. Additional metadata, such as the type of authentication or factors used, should also be collected."
+    cwe:
+      id: 778
+      name: "Insufficient Logging"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/778.html"
+      note: "If security critical information is not recorded, there will be no trail for forensic analysis and discovering the cause of problems or the source of attacks may become more difficult or impossible."
+  - id: "ASVS-V16-16.3.2"
+    section: "V16.3"
+    level: 2
+    rule: "Failed authorization attempts are logged. For L3, this must include logging all authorization decisions, including logging when sensitive data is accessed (without logging the sensitive data itself)."
+    cwe:
+      id: 285
+      name: "Improper Authorization"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/285.html"
+      note: "An attacker could read sensitive data, either by reading the data directly from a data store that is not properly restricted, or by accessing insufficiently-protected, privileged functionality to read the data.\n\nAn attacker could modify sensitive data, either by writing the data directly to a data store that is not properly restricted, or by accessing insufficiently-protected, privileged functionality to write the data.\n\nWhen access control checks are not applied consistently - or not at all - an attacker could gain privileges and execute unauthorized code or commands by modifying or reading critical data directly, or by accessing insufficiently-protected, privileged functionality."
+  - id: "ASVS-V16-16.3.3"
+    section: "V16.3"
+    level: 2
+    rule: "The application logs the security events that are defined in the documentation and also logs attempts to bypass the security controls, such as input validation, business logic, and anti-automation."
+    cwe:
+      id: 778
+      name: "Insufficient Logging"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/778.html"
+      note: "If security critical information is not recorded, there will be no trail for forensic analysis and discovering the cause of problems or the source of attacks may become more difficult or impossible."
+  - id: "ASVS-V16-16.3.4"
+    section: "V16.3"
+    level: 2
+    rule: "The application logs unexpected errors and security control failures such as backend TLS failures."
+    cwe:
+      id: 778
+      name: "Insufficient Logging"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/778.html"
+      note: "If security critical information is not recorded, there will be no trail for forensic analysis and discovering the cause of problems or the source of attacks may become more difficult or impossible."
+  - id: "ASVS-V16-16.4.1"
+    section: "V16.4"
+    level: 2
+    rule: "All logging components appropriately encode data to prevent log injection."
+    cwe:
+      id: 117
+      name: "Improper Output Neutralization for Logs"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/117.html"
+      note: "Interpretation of the log files may be hindered or misdirected if an attacker can supply data to the application that is subsequently logged verbatim. In the most benign case, an attacker may be able to insert false entries into the log file by providing the application with input that includes appropriate characters. Forged or otherwise corrupted log files can be used to cover an attacker's tracks, possibly by skewing statistics, or even to implicate another party in the commission of a malicious act. If the log file is processed automatically, the attacker can render the file unusable by corrupting the format of the file or injecting unexpected characters. An attacker may inject code or other commands into the log file and take advantage of a vulnerability in the log processing utility."
+  - id: "ASVS-V16-16.4.2"
+    section: "V16.4"
+    level: 2
+    rule: "Logs are protected from unauthorized access and cannot be modified."
+    cwe:
+      id: 200
+      name: "Exposure of Sensitive Information to an Unauthorized Actor"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/200.html"
+  - id: "ASVS-V16-16.4.3"
+    section: "V16.4"
+    level: 2
+    rule: "Logs are securely transmitted to a logically separate system for analysis, detection, alerting, and escalation. The aim is to ensure that if the application is breached, the logs are not compromised."
+  - id: "ASVS-V16-16.5.1"
+    section: "V16.5"
+    level: 2
+    rule: "A generic message is returned to the consumer when an unexpected or security-sensitive error occurs, ensuring no exposure of sensitive internal system data such as stack traces, queries, secret keys, and tokens."
+    cwe:
+      id: 210
+      name: "Self-generated Error Message Containing Sensitive Information"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/210.html"
+  - id: "ASVS-V16-16.5.2"
+    section: "V16.5"
+    level: 2
+    rule: "The application continues to operate securely when external resource access fails, for example, by using patterns such as circuit breakers or graceful degradation."
+  - id: "ASVS-V16-16.5.3"
+    section: "V16.5"
+    level: 2
+    rule: "The application fails gracefully and securely, including when an exception occurs, preventing fail-open conditions such as processing a transaction despite errors resulting from validation logic."
+  - id: "ASVS-V16-16.5.4"
+    section: "V16.5"
+    level: 3
+    rule: "A \"last resort\" error handler is defined which will catch all unhandled exceptions. This is both to avoid losing error details that must go to log files and to ensure that an error does not take down the entire application process, leading to a loss of availability."
+    cwe:
+      id: 431
+      name: "Missing Handler"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/431.html"

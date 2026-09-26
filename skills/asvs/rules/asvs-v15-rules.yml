@@ -1,0 +1,168 @@
+# asvs-v15-rules.yml
+# Verifiable requirements distilled from OWASP ASVS 5.0.0 - V15 Secure Coding and Architecture.
+meta:
+  prefix: "ASVS"
+  standard: "OWASP ASVS 5.0.0"
+  source: "references/0x24-V15-Secure-Coding-and-Architecture.md"
+  chapter: "V15"
+  title: "Secure Coding and Architecture"
+  requirements: 21
+  per_level: {L1: 3, L2: 10, L3: 8}
+  cwe:
+    mapped: 10
+    mapping: "scripts/asvs-5.0.0-cwe-mapping.yml (derived from OWASP ASVS 5.0.be, indicative only)"
+    catalogs:
+      - "cwe.xml: CWE 4.20 (2026-04-30), VIEW LIST: CWE-699: Software Development"
+      - "cwec_v4.20.xml: CWE 4.20 (2026-04-30), CWE"
+  sections:
+    - id: "V15.1"
+      title: "Secure Coding and Architecture Documentation"
+    - id: "V15.2"
+      title: "Security Architecture and Dependencies"
+    - id: "V15.3"
+      title: "Defensive Coding"
+    - id: "V15.4"
+      title: "Safe Concurrency"
+rules:
+  - id: "ASVS-V15-15.1.1"
+    section: "V15.1"
+    level: 1
+    rule: "Application documentation defines risk based remediation time frames for 3rd party component versions with vulnerabilities and for updating libraries in general, to minimize the risk from these components."
+  - id: "ASVS-V15-15.1.2"
+    section: "V15.1"
+    level: 2
+    rule: "An inventory catalog, such as software bill of materials (SBOM), is maintained of all third-party libraries in use, including verifying that components come from pre-defined, trusted, and continually maintained repositories."
+  - id: "ASVS-V15-15.1.3"
+    section: "V15.1"
+    level: 2
+    rule: "The application documentation identifies functionality which is time-consuming or resource-demanding. This must include how to prevent a loss of availability due to overusing this functionality and how to avoid a situation where building a response takes longer than the consumer's timeout. Potential defenses may include asynchronous processing, using queues, and limiting parallel processes per user and per application."
+  - id: "ASVS-V15-15.1.4"
+    section: "V15.1"
+    level: 3
+    rule: "Application documentation highlights third-party libraries which are considered to be \"risky components\"."
+    cwe:
+      id: 1061
+      name: "Insufficient Encapsulation"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/1061.html"
+      note: "An attacker can access data or methods that were not intended to be accessible.\n\nThis issue makes it more difficult to maintain the product, which indirectly affects security by making it more difficult or time-consuming to find and/or fix vulnerabilities. It also might make it easier to introduce vulnerabilities."
+  - id: "ASVS-V15-15.1.5"
+    section: "V15.1"
+    level: 3
+    rule: "Application documentation highlights parts of the application where \"dangerous functionality\" is being used."
+  - id: "ASVS-V15-15.2.1"
+    section: "V15.2"
+    level: 1
+    rule: "The application only contains components which have not breached the documented update and remediation time frames."
+  - id: "ASVS-V15-15.2.2"
+    section: "V15.2"
+    level: 2
+    rule: "The application has implemented defenses against loss of availability due to functionality which is time-consuming or resource-demanding, based on the documented security decisions and strategies for this."
+  - id: "ASVS-V15-15.2.3"
+    section: "V15.2"
+    level: 2
+    rule: "The production environment only includes functionality that is required for the application to function, and does not expose extraneous functionality such as test code, sample snippets, and development functionality."
+  - id: "ASVS-V15-15.2.4"
+    section: "V15.2"
+    level: 3
+    rule: "Third-party components and all of their transitive dependencies are included from the expected repository, whether internally owned or an external source, and that there is no risk of a dependency confusion attack."
+    cwe:
+      id: 427
+      name: "Uncontrolled Search Path Element"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/427.html"
+  - id: "ASVS-V15-15.2.5"
+    section: "V15.2"
+    level: 3
+    rule: "The application implements additional protections around parts of the application which are documented as containing \"dangerous functionality\" or using third-party libraries considered to be \"risky components\". This could include techniques such as sandboxing, encapsulation, containerization or network level isolation to delay and deter attackers who compromise one part of an application from pivoting elsewhere in the application."
+  - id: "ASVS-V15-15.3.1"
+    section: "V15.3"
+    level: 1
+    rule: "The application only returns the required subset of fields from a data object. For example, it should not return an entire data object, as some individual fields should not be accessible to users."
+  - id: "ASVS-V15-15.3.2"
+    section: "V15.3"
+    level: 2
+    rule: "Where the application backend makes calls to external URLs, it is configured to not follow redirects unless it is intended functionality."
+  - id: "ASVS-V15-15.3.3"
+    section: "V15.3"
+    level: 2
+    rule: "The application has countermeasures to protect against mass assignment attacks by limiting allowed fields per controller and action, e.g., it is not possible to insert or update a field value when it was not intended to be part of that action."
+    cwe:
+      id: 915
+      name: "Improperly Controlled Modification of Dynamically-Determined Object Attributes"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/915.html"
+      note: "An attacker could modify sensitive data or program variables."
+  - id: "ASVS-V15-15.3.4"
+    section: "V15.3"
+    level: 2
+    rule: "All proxying and middleware components transfer the user's original IP address correctly using trusted data fields that cannot be manipulated by the end user, and the application and web server use this correct value for logging and security decisions such as rate limiting, taking into account that even the original IP address may not be reliable due to dynamic IPs, VPNs, or corporate firewalls."
+    cwe:
+      id: 348
+      name: "Use of Less Trusted Source"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/348.html"
+      note: "An attacker could utilize the untrusted data source to bypass protection mechanisms and gain access to sensitive data."
+  - id: "ASVS-V15-15.3.5"
+    section: "V15.3"
+    level: 2
+    rule: "The application explicitly ensures that variables are of the correct type and performs strict equality and comparator operations. This is to avoid type juggling or type confusion vulnerabilities caused by the application code making an assumption about a variable type."
+    cwe:
+      id: 843
+      name: "Access of Resource Using Incompatible Type ('Type Confusion')"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/843.html"
+      note: "When a memory buffer is accessed using the wrong type, it could read or write memory out of the bounds of the buffer, if the allocated buffer is smaller than the type that the code is attempting to access, leading to a crash and possibly code execution."
+  - id: "ASVS-V15-15.3.6"
+    section: "V15.3"
+    level: 2
+    rule: "JavaScript code is written in a way that prevents prototype pollution, for example, by using Set() or Map() instead of object literals."
+  - id: "ASVS-V15-15.3.7"
+    section: "V15.3"
+    level: 2
+    rule: "The application has defenses against HTTP parameter pollution attacks, particularly if the application framework makes no distinction about the source of request parameters (query string, body parameters, cookies, or header fields)."
+    cwe:
+      id: 235
+      name: "Improper Handling of Extra Parameters"
+      abstraction: "Variant"
+      url: "https://cwe.mitre.org/data/definitions/235.html"
+  - id: "ASVS-V15-15.4.1"
+    section: "V15.4"
+    level: 3
+    rule: "Shared objects in multi-threaded code (such as caches, files, or in-memory objects accessed by multiple threads) are accessed safely by using thread-safe types and synchronization mechanisms like locks or semaphores to avoid race conditions and data corruption."
+    cwe:
+      id: 362
+      name: "Concurrent Execution using Shared Resource with Improper Synchronization ('Race Condition')"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/362.html"
+      note: "When a race condition makes it possible to bypass a resource cleanup routine or trigger multiple initialization routines, it may lead to resource exhaustion.\n\nWhen a race condition allows multiple control flows to access a resource simultaneously, it might lead the product(s) into unexpected states, possibly resulting in a crash.\n\nWhen a race condition is combined with predictable resource names and loose permissions, it may be possible for an attacker to overwrite or access confidential data (CWE-59).\n\nThis can have security implications when the expected synchronization is in security-critical code, such as recording whether a user is authenticated or modifying important state information that should not be influenced by an outsider."
+  - id: "ASVS-V15-15.4.2"
+    section: "V15.4"
+    level: 3
+    rule: "Checks on a resource's state, such as its existence or permissions, and the actions that depend on them are performed as a single atomic operation to prevent time-of-check to time-of-use (TOCTOU) race conditions. For example, checking if a file exists before opening it, or verifying a user’s access before granting it."
+    cwe:
+      id: 367
+      name: "Time-of-check Time-of-use (TOCTOU) Race Condition"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/367.html"
+      note: "The attacker can gain access to otherwise unauthorized resources.\n\nRace conditions such as this kind may be employed to gain read or write access to resources which are not normally readable or writable by the user in question.\n\nThe resource in question, or other resources (through the corrupted one), may be changed in undesirable ways by a malicious user.\n\nIf a file or other resource is written in this method, as opposed to in a valid way, logging of the activity may not occur.\n\nIn some cases it may be possible to delete files a malicious user might not otherwise have access to, such as log files.\n\nThe product may perform invalid actions when the resource is in an unexpected state."
+  - id: "ASVS-V15-15.4.3"
+    section: "V15.4"
+    level: 3
+    rule: "Locks are used consistently to avoid threads getting stuck, whether by waiting on each other or retrying endlessly, and that locking logic stays within the code responsible for managing the resource to ensure locks cannot be inadvertently or maliciously modified by external classes or code."
+    cwe:
+      id: 833
+      name: "Deadlock"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/833.html"
+      note: "Each thread of execution will \"hang\" and prevent tasks from completing. In some cases, CPU consumption may occur if a lock check occurs in a tight loop."
+  - id: "ASVS-V15-15.4.4"
+    section: "V15.4"
+    level: 3
+    rule: "Resource allocation policies prevent thread starvation by ensuring fair access to resources, such as by leveraging thread pools, allowing lower-priority threads to proceed within a reasonable timeframe."
+    cwe:
+      id: 410
+      name: "Insufficient Resource Pool"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/410.html"
+      note: "Floods often cause a crash or other problem besides denial of the resource itself; these are likely examples of *other* vulnerabilities, not an insufficient resource pool."

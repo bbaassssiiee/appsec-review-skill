@@ -1,0 +1,159 @@
+# asvs-v7-rules.yml
+# Verifiable requirements distilled from OWASP ASVS 5.0.0 - V7 Session Management.
+meta:
+  prefix: "ASVS"
+  standard: "OWASP ASVS 5.0.0"
+  source: "references/0x16-V7-Session-Management.md"
+  chapter: "V7"
+  title: "Session Management"
+  requirements: 19
+  per_level: {L1: 6, L2: 12, L3: 1}
+  cwe:
+    mapped: 10
+    mapping: "scripts/asvs-5.0.0-cwe-mapping.yml (derived from OWASP ASVS 5.0.be, indicative only)"
+    catalogs:
+      - "cwe.xml: CWE 4.20 (2026-04-30), VIEW LIST: CWE-699: Software Development"
+      - "cwec_v4.20.xml: CWE 4.20 (2026-04-30), CWE"
+  sections:
+    - id: "V7.1"
+      title: "Session Management Documentation"
+    - id: "V7.2"
+      title: "Fundamental Session Management Security"
+    - id: "V7.3"
+      title: "Session Timeout"
+    - id: "V7.4"
+      title: "Session Termination"
+    - id: "V7.5"
+      title: "Defenses Against Session Abuse"
+    - id: "V7.6"
+      title: "Federated Re-authentication"
+rules:
+  - id: "ASVS-V7-7.1.1"
+    section: "V7.1"
+    level: 2
+    rule: "The user's session inactivity timeout and absolute maximum session lifetime are documented, are appropriate in combination with other controls, and that the documentation includes justification for any deviations from NIST SP 800-63B re-authentication requirements."
+  - id: "ASVS-V7-7.1.2"
+    section: "V7.1"
+    level: 2
+    rule: "The documentation defines how many concurrent (parallel) sessions are allowed for one account as well as the intended behaviors and actions to be taken when the maximum number of active sessions is reached."
+  - id: "ASVS-V7-7.1.3"
+    section: "V7.1"
+    level: 2
+    rule: "All systems that create and manage user sessions as part of a federated identity management ecosystem (such as SSO systems) are documented along with controls to coordinate session lifetimes, termination, and any other conditions that require re-authentication."
+  - id: "ASVS-V7-7.2.1"
+    section: "V7.2"
+    level: 1
+    rule: "The application performs all session token verification using a trusted, backend service."
+    cwe:
+      id: 603
+      name: "Use of Client-Side Authentication"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/603.html"
+  - id: "ASVS-V7-7.2.2"
+    section: "V7.2"
+    level: 1
+    rule: "The application uses either self-contained or reference tokens that are dynamically generated for session management, i.e. not using static API secrets and keys."
+    cwe:
+      id: 798
+      name: "Use of Hard-coded Credentials"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/798.html"
+      note: "If hard-coded passwords are used, it is almost certain that malicious users will gain access to the account in question. Any user of the product that hard-codes passwords may be able to extract the password. Client-side systems with hard-coded passwords pose even more of a threat, since the extraction of a password from a binary is usually very simple.\n\nThis weakness can lead to the exposure of resources or functionality to unintended actors, possibly providing attackers with sensitive information or even execute arbitrary code. If the password is ever discovered or published (a common occurrence on the Internet), then anybody with knowledge of this password can access the product. Finally, since all installations of the product will have the same password, even across different organizations, this enables massive attacks such as worms to take place."
+  - id: "ASVS-V7-7.2.3"
+    section: "V7.2"
+    level: 1
+    rule: "If reference tokens are used to represent user sessions, they are unique and generated using a cryptographically secure pseudo-random number generator (CSPRNG) and possess at least 128 bits of entropy."
+  - id: "ASVS-V7-7.2.4"
+    section: "V7.2"
+    level: 1
+    rule: "The application generates a new session token on user authentication, including re-authentication, and terminates the current session token."
+  - id: "ASVS-V7-7.3.1"
+    section: "V7.3"
+    level: 2
+    rule: "There is an inactivity timeout such that re-authentication is enforced according to risk analysis and documented security decisions."
+    cwe:
+      id: 613
+      name: "Insufficient Session Expiration"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/613.html"
+  - id: "ASVS-V7-7.3.2"
+    section: "V7.3"
+    level: 2
+    rule: "There is an absolute maximum session lifetime such that re-authentication is enforced according to risk analysis and documented security decisions."
+  - id: "ASVS-V7-7.4.1"
+    section: "V7.4"
+    level: 1
+    rule: "When session termination is triggered (such as logout or expiration), the application disallows any further use of the session. For reference tokens or stateful sessions, this means invalidating the session data at the application backend. Applications using self-contained tokens will need a solution such as maintaining a list of terminated tokens, disallowing tokens produced before a per-user date and time or rotating a per-user signing key."
+    cwe:
+      id: 613
+      name: "Insufficient Session Expiration"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/613.html"
+  - id: "ASVS-V7-7.4.2"
+    section: "V7.4"
+    level: 1
+    rule: "The application terminates all active sessions when a user account is disabled or deleted (such as an employee leaving the company)."
+    cwe:
+      id: 613
+      name: "Insufficient Session Expiration"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/613.html"
+  - id: "ASVS-V7-7.4.3"
+    section: "V7.4"
+    level: 2
+    rule: "The application gives the option to terminate all other active sessions after a successful change or removal of any authentication factor (including password change via reset or recovery and, if present, an MFA settings update)."
+    cwe:
+      id: 613
+      name: "Insufficient Session Expiration"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/613.html"
+  - id: "ASVS-V7-7.4.4"
+    section: "V7.4"
+    level: 2
+    rule: "All pages that require authentication have easy and visible access to logout functionality."
+  - id: "ASVS-V7-7.4.5"
+    section: "V7.4"
+    level: 2
+    rule: "Application administrators are able to terminate active sessions for an individual user or for all users."
+    cwe:
+      id: 613
+      name: "Insufficient Session Expiration"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/613.html"
+  - id: "ASVS-V7-7.5.1"
+    section: "V7.5"
+    level: 2
+    rule: "The application requires full re-authentication before allowing modifications to sensitive account attributes which may affect authentication such as email address, phone number, MFA configuration, or other information used in account recovery."
+    cwe:
+      id: 306
+      name: "Missing Authentication for Critical Function"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/306.html"
+      note: "Exposing critical functionality essentially provides an attacker with the privilege level of that functionality. The consequences will depend on the associated functionality, but they can range from reading or modifying sensitive data, accessing administrative or other privileged functionality, or possibly even executing arbitrary code."
+  - id: "ASVS-V7-7.5.2"
+    section: "V7.5"
+    level: 2
+    rule: "Users are able to view and (having authenticated again with at least one factor) terminate any or all currently active sessions."
+  - id: "ASVS-V7-7.5.3"
+    section: "V7.5"
+    level: 3
+    rule: "The application requires further authentication with at least one factor or secondary verification before performing highly sensitive transactions or operations."
+    cwe:
+      id: 306
+      name: "Missing Authentication for Critical Function"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/306.html"
+      note: "Exposing critical functionality essentially provides an attacker with the privilege level of that functionality. The consequences will depend on the associated functionality, but they can range from reading or modifying sensitive data, accessing administrative or other privileged functionality, or possibly even executing arbitrary code."
+  - id: "ASVS-V7-7.6.1"
+    section: "V7.6"
+    level: 2
+    rule: "Session lifetime and termination between Relying Parties (RPs) and Identity Providers (IdPs) behave as documented, requiring re-authentication as necessary such as when the maximum time between IdP authentication events is reached."
+    cwe:
+      id: 613
+      name: "Insufficient Session Expiration"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/613.html"
+  - id: "ASVS-V7-7.6.2"
+    section: "V7.6"
+    level: 2
+    rule: "Creation of a session requires either the user's consent or an explicit action, preventing the creation of new application sessions without user interaction."

@@ -1,0 +1,443 @@
+# asvs-v6-rules.yml
+# Verifiable requirements distilled from OWASP ASVS 5.0.0 - V6 Authentication.
+meta:
+  prefix: "ASVS"
+  standard: "OWASP ASVS 5.0.0"
+  source: "references/0x15-V6-Authentication.md"
+  chapter: "V6"
+  title: "Authentication"
+  requirements: 47
+  per_level: {L1: 13, L2: 22, L3: 12}
+  cwe:
+    mapped: 38
+    mapping: "scripts/asvs-5.0.0-cwe-mapping.yml (derived from OWASP ASVS 5.0.be, indicative only)"
+    catalogs:
+      - "cwe.xml: CWE 4.20 (2026-04-30), VIEW LIST: CWE-699: Software Development"
+      - "cwec_v4.20.xml: CWE 4.20 (2026-04-30), CWE"
+  sections:
+    - id: "V6.1"
+      title: "Authentication Documentation"
+    - id: "V6.2"
+      title: "Password Security"
+    - id: "V6.3"
+      title: "General Authentication Security"
+    - id: "V6.4"
+      title: "Authentication Factor Lifecycle and Recovery"
+    - id: "V6.5"
+      title: "General Multi-factor authentication requirements"
+    - id: "V6.6"
+      title: "Out-of-Band authentication mechanisms"
+    - id: "V6.7"
+      title: "Cryptographic authentication mechanism"
+    - id: "V6.8"
+      title: "Authentication with an Identity Provider"
+rules:
+  - id: "ASVS-V6-6.1.1"
+    section: "V6.1"
+    level: 1
+    rule: "Application documentation defines how controls such as rate limiting, anti-automation, and adaptive response, are used to defend against attacks such as credential stuffing and password brute force. The documentation must make clear how these controls are configured and prevent malicious account lockout."
+    cwe:
+      id: 307
+      name: "Improper Restriction of Excessive Authentication Attempts"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/307.html"
+      note: "An attacker could perform an arbitrary number of authentication attempts using different passwords, and eventually gain access to the targeted account using a brute force attack."
+  - id: "ASVS-V6-6.1.2"
+    section: "V6.1"
+    level: 2
+    rule: "A list of context-specific words is documented in order to prevent their use in passwords. The list could include permutations of organization names, product names, system identifiers, project codenames, department or role names, and similar."
+    cwe:
+      id: 521
+      name: "Weak Password Requirements"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/521.html"
+      note: "An attacker could easily guess user passwords and gain access user accounts."
+  - id: "ASVS-V6-6.1.3"
+    section: "V6.1"
+    level: 2
+    rule: "Verify that, if the application includes multiple authentication pathways, these are all documented together with the security controls and authentication strength which must be consistently enforced across them."
+    cwe:
+      id: 306
+      name: "Missing Authentication for Critical Function"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/306.html"
+      note: "Exposing critical functionality essentially provides an attacker with the privilege level of that functionality. The consequences will depend on the associated functionality, but they can range from reading or modifying sensitive data, accessing administrative or other privileged functionality, or possibly even executing arbitrary code."
+  - id: "ASVS-V6-6.2.1"
+    section: "V6.2"
+    level: 1
+    rule: "User set passwords are at least 8 characters in length although a minimum of 15 characters is strongly recommended."
+    cwe:
+      id: 521
+      name: "Weak Password Requirements"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/521.html"
+      note: "An attacker could easily guess user passwords and gain access user accounts."
+  - id: "ASVS-V6-6.2.2"
+    section: "V6.2"
+    level: 1
+    rule: "Users can change their password."
+    cwe:
+      id: 620
+      name: "Unverified Password Change"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/620.html"
+  - id: "ASVS-V6-6.2.3"
+    section: "V6.2"
+    level: 1
+    rule: "Password change functionality requires the user's current and new password."
+    cwe:
+      id: 620
+      name: "Unverified Password Change"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/620.html"
+  - id: "ASVS-V6-6.2.4"
+    section: "V6.2"
+    level: 1
+    rule: "Passwords submitted during account registration or password change are checked against an available set of, at least, the top 3000 passwords which match the application's password policy, e.g. minimum length."
+    cwe:
+      id: 521
+      name: "Weak Password Requirements"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/521.html"
+      note: "An attacker could easily guess user passwords and gain access user accounts."
+  - id: "ASVS-V6-6.2.5"
+    section: "V6.2"
+    level: 1
+    rule: "Passwords of any composition can be used, without rules limiting the type of characters permitted. There must be no requirement for a minimum number of upper or lower case characters, numbers, or special characters."
+    cwe:
+      id: 521
+      name: "Weak Password Requirements"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/521.html"
+      note: "An attacker could easily guess user passwords and gain access user accounts."
+  - id: "ASVS-V6-6.2.6"
+    section: "V6.2"
+    level: 1
+    rule: "Password input fields use type=password to mask the entry. Applications may allow the user to temporarily view the entire masked password, or the last typed character of the password."
+    cwe:
+      id: 549
+      name: "Missing Password Field Masking"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/549.html"
+  - id: "ASVS-V6-6.2.7"
+    section: "V6.2"
+    level: 1
+    rule: "\"paste\" functionality, browser password helpers, and external password managers are permitted."
+    cwe:
+      id: 521
+      name: "Weak Password Requirements"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/521.html"
+      note: "An attacker could easily guess user passwords and gain access user accounts."
+  - id: "ASVS-V6-6.2.8"
+    section: "V6.2"
+    level: 1
+    rule: "The application verifies the user's password exactly as received from the user, without any modifications such as truncation or case transformation."
+  - id: "ASVS-V6-6.2.9"
+    section: "V6.2"
+    level: 2
+    rule: "Passwords of at least 64 characters are permitted."
+    cwe:
+      id: 521
+      name: "Weak Password Requirements"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/521.html"
+      note: "An attacker could easily guess user passwords and gain access user accounts."
+  - id: "ASVS-V6-6.2.10"
+    section: "V6.2"
+    level: 2
+    rule: "A user's password stays valid until it is discovered to be compromised or the user rotates it. The application must not require periodic credential rotation."
+  - id: "ASVS-V6-6.2.11"
+    section: "V6.2"
+    level: 2
+    rule: "The documented list of context specific words is used to prevent easy to guess passwords being created."
+    cwe:
+      id: 521
+      name: "Weak Password Requirements"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/521.html"
+      note: "An attacker could easily guess user passwords and gain access user accounts."
+  - id: "ASVS-V6-6.2.12"
+    section: "V6.2"
+    level: 2
+    rule: "Passwords submitted during account registration or password changes are checked against a set of breached passwords."
+  - id: "ASVS-V6-6.3.1"
+    section: "V6.3"
+    level: 1
+    rule: "Controls to prevent attacks such as credential stuffing and password brute force are implemented according to the application's security documentation."
+    cwe:
+      id: 307
+      name: "Improper Restriction of Excessive Authentication Attempts"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/307.html"
+      note: "An attacker could perform an arbitrary number of authentication attempts using different passwords, and eventually gain access to the targeted account using a brute force attack."
+  - id: "ASVS-V6-6.3.2"
+    section: "V6.3"
+    level: 1
+    rule: "Default user accounts (e.g., \"root\", \"admin\", or \"sa\") are not present in the application or are disabled."
+    cwe:
+      id: 798
+      name: "Use of Hard-coded Credentials"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/798.html"
+      note: "If hard-coded passwords are used, it is almost certain that malicious users will gain access to the account in question. Any user of the product that hard-codes passwords may be able to extract the password. Client-side systems with hard-coded passwords pose even more of a threat, since the extraction of a password from a binary is usually very simple.\n\nThis weakness can lead to the exposure of resources or functionality to unintended actors, possibly providing attackers with sensitive information or even execute arbitrary code. If the password is ever discovered or published (a common occurrence on the Internet), then anybody with knowledge of this password can access the product. Finally, since all installations of the product will have the same password, even across different organizations, this enables massive attacks such as worms to take place."
+  - id: "ASVS-V6-6.3.3"
+    section: "V6.3"
+    level: 2
+    rule: "Either a multi-factor authentication mechanism or a combination of single-factor authentication mechanisms, must be used in order to access the application. For L3, one of the factors must be a hardware-based authentication mechanism which provides compromise and impersonation resistance against phishing attacks while verifying the intent to authenticate by requiring a user-initiated action (such as a button press on a FIDO hardware key or a mobile phone). Relaxing any of the considerations in this requirement requires a fully documented rationale and a comprehensive set of mitigating controls."
+    cwe:
+      id: 308
+      name: "Use of Single-factor Authentication"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/308.html"
+      note: "If the secret in a single-factor authentication scheme gets compromised, full authentication is possible."
+  - id: "ASVS-V6-6.3.4"
+    section: "V6.3"
+    level: 2
+    rule: "Verify that, if the application includes multiple authentication pathways, there are no undocumented pathways and that security controls and authentication strength are enforced consistently."
+    cwe:
+      id: 306
+      name: "Missing Authentication for Critical Function"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/306.html"
+      note: "Exposing critical functionality essentially provides an attacker with the privilege level of that functionality. The consequences will depend on the associated functionality, but they can range from reading or modifying sensitive data, accessing administrative or other privileged functionality, or possibly even executing arbitrary code."
+  - id: "ASVS-V6-6.3.5"
+    section: "V6.3"
+    level: 3
+    rule: "Users are notified of suspicious authentication attempts (successful or unsuccessful). This may include authentication attempts from an unusual location or client, partially successful authentication (only one of multiple factors), an authentication attempt after a long period of inactivity or a successful authentication after several unsuccessful attempts."
+    cwe:
+      id: 778
+      name: "Insufficient Logging"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/778.html"
+      note: "If security critical information is not recorded, there will be no trail for forensic analysis and discovering the cause of problems or the source of attacks may become more difficult or impossible."
+  - id: "ASVS-V6-6.3.6"
+    section: "V6.3"
+    level: 3
+    rule: "Email is not used as either a single-factor or multi-factor authentication mechanism."
+    cwe:
+      id: 304
+      name: "Missing Critical Step in Authentication"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/304.html"
+      note: "This weakness can lead to the exposure of resources or functionality to unintended actors, possibly providing attackers with sensitive information or allowing attackers to execute arbitrary code."
+  - id: "ASVS-V6-6.3.7"
+    section: "V6.3"
+    level: 3
+    rule: "Users are notified after updates to authentication details, such as credential resets or modification of the username or email address."
+    cwe:
+      id: 778
+      name: "Insufficient Logging"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/778.html"
+      note: "If security critical information is not recorded, there will be no trail for forensic analysis and discovering the cause of problems or the source of attacks may become more difficult or impossible."
+  - id: "ASVS-V6-6.3.8"
+    section: "V6.3"
+    level: 3
+    rule: "Valid users cannot be deduced from failed authentication challenges, such as by basing on error messages, HTTP response codes, or different response times. Registration and forgot password functionality must also have this protection."
+  - id: "ASVS-V6-6.4.1"
+    section: "V6.4"
+    level: 1
+    rule: "System generated initial passwords or activation codes are securely randomly generated, follow the existing password policy, and expire after a short period of time or after they are initially used. These initial secrets must not be permitted to become the long term password."
+    cwe:
+      id: 330
+      name: "Use of Insufficiently Random Values"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/330.html"
+      note: "When a protection mechanism relies on random values to restrict access to a sensitive resource, such as a session ID or a seed for generating a cryptographic key, then the resource being protected could be accessed by guessing the ID or key.\n\nIf product relies on unique, unguessable IDs to identify a resource, an attacker might be able to guess an ID for a resource that is owned by another user. The attacker could then read the resource, or pre-create a resource with the same ID to prevent the legitimate program from properly sending the resource to the intended user. For example, a product might maintain session information in a file whose name is based on a username. An attacker could pre-create this file for a victim user, then set the permissions so that the application cannot generate the session for the victim, preventing the victim from using the application.\n\nWhen an authorization or authentication mechanism relies on random values to restrict access to restricted functionality, such as a session ID or a seed for generating a cryptographic key, then an attacker may access the restricted functionality by guessing the ID or key."
+  - id: "ASVS-V6-6.4.2"
+    section: "V6.4"
+    level: 1
+    rule: "Password hints or knowledge-based authentication (so-called \"secret questions\") are not present."
+    cwe:
+      id: 640
+      name: "Weak Password Recovery Mechanism for Forgotten Password"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/640.html"
+      note: "An attacker could gain unauthorized access to the system by retrieving legitimate user's authentication credentials.\n\nAn attacker could deny service to legitimate system users by launching a brute force attack on the password recovery mechanism using user ids of legitimate users.\n\nThe system's security functionality is turned against the system by the attacker."
+  - id: "ASVS-V6-6.4.3"
+    section: "V6.4"
+    level: 2
+    rule: "A secure process for resetting a forgotten password is implemented, that does not bypass any enabled multi-factor authentication mechanisms."
+    cwe:
+      id: 640
+      name: "Weak Password Recovery Mechanism for Forgotten Password"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/640.html"
+      note: "An attacker could gain unauthorized access to the system by retrieving legitimate user's authentication credentials.\n\nAn attacker could deny service to legitimate system users by launching a brute force attack on the password recovery mechanism using user ids of legitimate users.\n\nThe system's security functionality is turned against the system by the attacker."
+  - id: "ASVS-V6-6.4.4"
+    section: "V6.4"
+    level: 2
+    rule: "If a multi-factor authentication factor is lost, evidence of identity proofing is performed at the same level as during enrollment."
+    cwe:
+      id: 308
+      name: "Use of Single-factor Authentication"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/308.html"
+      note: "If the secret in a single-factor authentication scheme gets compromised, full authentication is possible."
+  - id: "ASVS-V6-6.4.5"
+    section: "V6.4"
+    level: 3
+    rule: "Renewal instructions for authentication mechanisms which expire are sent with enough time to be carried out before the old authentication mechanism expires, configuring automated reminders if necessary."
+    cwe:
+      id: 287
+      name: "Improper Authentication"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/287.html"
+      note: "This weakness can lead to the exposure of resources or functionality to unintended actors, possibly providing attackers with sensitive information or even execute arbitrary code."
+  - id: "ASVS-V6-6.4.6"
+    section: "V6.4"
+    level: 3
+    rule: "Administrative users can initiate the password reset process for the user, but that this does not allow them to change or choose the user's password. This prevents a situation where they know the user's password."
+    cwe:
+      id: 620
+      name: "Unverified Password Change"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/620.html"
+  - id: "ASVS-V6-6.5.1"
+    section: "V6.5"
+    level: 2
+    rule: "Lookup secrets, out-of-band authentication requests or codes, and time-based one-time passwords (TOTPs) are only successfully usable once."
+    cwe:
+      id: 308
+      name: "Use of Single-factor Authentication"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/308.html"
+      note: "If the secret in a single-factor authentication scheme gets compromised, full authentication is possible."
+  - id: "ASVS-V6-6.5.2"
+    section: "V6.5"
+    level: 2
+    rule: "Verify that, when being stored in the application's backend, lookup secrets with less than 112 bits of entropy (19 random alphanumeric characters or 34 random digits) are hashed with an approved password storage hashing algorithm that incorporates a 32-bit random salt. A standard hash function can be used if the secret has 112 bits of entropy or more."
+    cwe:
+      id: 330
+      name: "Use of Insufficiently Random Values"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/330.html"
+      note: "When a protection mechanism relies on random values to restrict access to a sensitive resource, such as a session ID or a seed for generating a cryptographic key, then the resource being protected could be accessed by guessing the ID or key.\n\nIf product relies on unique, unguessable IDs to identify a resource, an attacker might be able to guess an ID for a resource that is owned by another user. The attacker could then read the resource, or pre-create a resource with the same ID to prevent the legitimate program from properly sending the resource to the intended user. For example, a product might maintain session information in a file whose name is based on a username. An attacker could pre-create this file for a victim user, then set the permissions so that the application cannot generate the session for the victim, preventing the victim from using the application.\n\nWhen an authorization or authentication mechanism relies on random values to restrict access to restricted functionality, such as a session ID or a seed for generating a cryptographic key, then an attacker may access the restricted functionality by guessing the ID or key."
+  - id: "ASVS-V6-6.5.3"
+    section: "V6.5"
+    level: 2
+    rule: "Lookup secrets, out-of-band authentication code, and time-based one-time password seeds, are generated using a Cryptographically Secure Pseudorandom Number Generator (CSPRNG) to avoid predictable values."
+    cwe:
+      id: 310
+      name: "Cryptographic Issues"
+      abstraction: "Category"
+      url: "https://cwe.mitre.org/data/definitions/310.html"
+  - id: "ASVS-V6-6.5.4"
+    section: "V6.5"
+    level: 2
+    rule: "Lookup secrets and out-of-band authentication codes have a minimum of 20 bits of entropy (typically 4 random alphanumeric characters or 6 random digits is sufficient)."
+    cwe:
+      id: 330
+      name: "Use of Insufficiently Random Values"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/330.html"
+      note: "When a protection mechanism relies on random values to restrict access to a sensitive resource, such as a session ID or a seed for generating a cryptographic key, then the resource being protected could be accessed by guessing the ID or key.\n\nIf product relies on unique, unguessable IDs to identify a resource, an attacker might be able to guess an ID for a resource that is owned by another user. The attacker could then read the resource, or pre-create a resource with the same ID to prevent the legitimate program from properly sending the resource to the intended user. For example, a product might maintain session information in a file whose name is based on a username. An attacker could pre-create this file for a victim user, then set the permissions so that the application cannot generate the session for the victim, preventing the victim from using the application.\n\nWhen an authorization or authentication mechanism relies on random values to restrict access to restricted functionality, such as a session ID or a seed for generating a cryptographic key, then an attacker may access the restricted functionality by guessing the ID or key."
+  - id: "ASVS-V6-6.5.5"
+    section: "V6.5"
+    level: 2
+    rule: "Out-of-band authentication requests, codes, or tokens, as well as time-based one-time passwords (TOTPs) have a defined lifetime. Out of band requests must have a maximum lifetime of 10 minutes and for TOTP a maximum lifetime of 30 seconds."
+    cwe:
+      id: 287
+      name: "Improper Authentication"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/287.html"
+      note: "This weakness can lead to the exposure of resources or functionality to unintended actors, possibly providing attackers with sensitive information or even execute arbitrary code."
+  - id: "ASVS-V6-6.5.6"
+    section: "V6.5"
+    level: 3
+    rule: "Any authentication factor (including physical devices) can be revoked in case of theft or other loss."
+    cwe:
+      id: 613
+      name: "Insufficient Session Expiration"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/613.html"
+  - id: "ASVS-V6-6.5.7"
+    section: "V6.5"
+    level: 3
+    rule: "Biometric authentication mechanisms are only used as secondary factors together with either something you have or something you know."
+    cwe:
+      id: 308
+      name: "Use of Single-factor Authentication"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/308.html"
+      note: "If the secret in a single-factor authentication scheme gets compromised, full authentication is possible."
+  - id: "ASVS-V6-6.5.8"
+    section: "V6.5"
+    level: 3
+    rule: "Time-based one-time passwords (TOTPs) are checked based on a time source from a trusted service and not from an untrusted or client provided time."
+    cwe:
+      id: 367
+      name: "Time-of-check Time-of-use (TOCTOU) Race Condition"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/367.html"
+      note: "The attacker can gain access to otherwise unauthorized resources.\n\nRace conditions such as this kind may be employed to gain read or write access to resources which are not normally readable or writable by the user in question.\n\nThe resource in question, or other resources (through the corrupted one), may be changed in undesirable ways by a malicious user.\n\nIf a file or other resource is written in this method, as opposed to in a valid way, logging of the activity may not occur.\n\nIn some cases it may be possible to delete files a malicious user might not otherwise have access to, such as log files.\n\nThe product may perform invalid actions when the resource is in an unexpected state."
+  - id: "ASVS-V6-6.6.1"
+    section: "V6.6"
+    level: 2
+    rule: "Authentication mechanisms using the Public Switched Telephone Network (PSTN) to deliver One-time Passwords (OTPs) via phone or SMS are offered only when the phone number has previously been validated, alternate stronger methods (such as Time based One-time Passwords) are also offered, and the service provides information on their security risks to users. For L3 applications, phone and SMS must not be available as options."
+    cwe:
+      id: 287
+      name: "Improper Authentication"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/287.html"
+      note: "This weakness can lead to the exposure of resources or functionality to unintended actors, possibly providing attackers with sensitive information or even execute arbitrary code."
+  - id: "ASVS-V6-6.6.2"
+    section: "V6.6"
+    level: 2
+    rule: "Out-of-band authentication requests, codes, or tokens are bound to the original authentication request for which they were generated and are not usable for a previous or subsequent one."
+    cwe:
+      id: 287
+      name: "Improper Authentication"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/287.html"
+      note: "This weakness can lead to the exposure of resources or functionality to unintended actors, possibly providing attackers with sensitive information or even execute arbitrary code."
+  - id: "ASVS-V6-6.6.3"
+    section: "V6.6"
+    level: 2
+    rule: "A code based out-of-band authentication mechanism is protected against brute force attacks by using rate limiting. Consider also using a code with at least 64 bits of entropy."
+    cwe:
+      id: 307
+      name: "Improper Restriction of Excessive Authentication Attempts"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/307.html"
+      note: "An attacker could perform an arbitrary number of authentication attempts using different passwords, and eventually gain access to the targeted account using a brute force attack."
+  - id: "ASVS-V6-6.6.4"
+    section: "V6.6"
+    level: 3
+    rule: "Verify that, where push notifications are used for multi-factor authentication, rate limiting is used to prevent push bombing attacks. Number matching may also mitigate this risk."
+  - id: "ASVS-V6-6.7.1"
+    section: "V6.7"
+    level: 3
+    rule: "The certificates used to verify cryptographic authentication assertions are stored in a way protects them from modification."
+    cwe:
+      id: 320
+      name: "Key Management Errors"
+      abstraction: "Category"
+      url: "https://cwe.mitre.org/data/definitions/320.html"
+  - id: "ASVS-V6-6.7.2"
+    section: "V6.7"
+    level: 3
+    rule: "The challenge nonce is at least 64 bits in length, and statistically unique or unique over the lifetime of the cryptographic device."
+    cwe:
+      id: 330
+      name: "Use of Insufficiently Random Values"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/330.html"
+      note: "When a protection mechanism relies on random values to restrict access to a sensitive resource, such as a session ID or a seed for generating a cryptographic key, then the resource being protected could be accessed by guessing the ID or key.\n\nIf product relies on unique, unguessable IDs to identify a resource, an attacker might be able to guess an ID for a resource that is owned by another user. The attacker could then read the resource, or pre-create a resource with the same ID to prevent the legitimate program from properly sending the resource to the intended user. For example, a product might maintain session information in a file whose name is based on a username. An attacker could pre-create this file for a victim user, then set the permissions so that the application cannot generate the session for the victim, preventing the victim from using the application.\n\nWhen an authorization or authentication mechanism relies on random values to restrict access to restricted functionality, such as a session ID or a seed for generating a cryptographic key, then an attacker may access the restricted functionality by guessing the ID or key."
+  - id: "ASVS-V6-6.8.1"
+    section: "V6.8"
+    level: 2
+    rule: "Verify that, if the application supports multiple identity providers (IdPs), the user's identity cannot be spoofed via another supported identity provider (eg. by using the same user identifier). The standard mitigation would be for the application to register and identify the user using a combination of the IdP ID (serving as a namespace) and the user's ID in the IdP."
+  - id: "ASVS-V6-6.8.2"
+    section: "V6.8"
+    level: 2
+    rule: "The presence and integrity of digital signatures on authentication assertions (for example on JWTs or SAML assertions) are always validated, rejecting any assertions that are unsigned or have invalid signatures."
+  - id: "ASVS-V6-6.8.3"
+    section: "V6.8"
+    level: 2
+    rule: "SAML assertions are uniquely processed and used only once within the validity period to prevent replay attacks."
+  - id: "ASVS-V6-6.8.4"
+    section: "V6.8"
+    level: 2
+    rule: "Verify that, if an application uses a separate Identity Provider (IdP) and expects specific authentication strength, methods, or recentness for specific functions, the application verifies this using the information returned by the IdP. For example, if OIDC is used, this might be achieved by validating ID Token claims such as 'acr', 'amr', and 'auth_time' (if present). If the IdP does not provide this information, the application must have a documented fallback approach that assumes that the minimum strength authentication mechanism was used (for example, single-factor authentication using username and password)."

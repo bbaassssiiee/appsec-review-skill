@@ -1,0 +1,127 @@
+# asvs-v14-rules.yml
+# Verifiable requirements distilled from OWASP ASVS 5.0.0 - V14 Data Protection.
+meta:
+  prefix: "ASVS"
+  standard: "OWASP ASVS 5.0.0"
+  source: "references/0x23-V14-Data-Protection.md"
+  chapter: "V14"
+  title: "Data Protection"
+  requirements: 13
+  per_level: {L1: 2, L2: 7, L3: 4}
+  cwe:
+    mapped: 9
+    mapping: "scripts/asvs-5.0.0-cwe-mapping.yml (derived from OWASP ASVS 5.0.be, indicative only)"
+    catalogs:
+      - "cwe.xml: CWE 4.20 (2026-04-30), VIEW LIST: CWE-699: Software Development"
+      - "cwec_v4.20.xml: CWE 4.20 (2026-04-30), CWE"
+  sections:
+    - id: "V14.1"
+      title: "Data Protection Documentation"
+    - id: "V14.2"
+      title: "General Data Protection"
+    - id: "V14.3"
+      title: "Client-side Data Protection"
+rules:
+  - id: "ASVS-V14-14.1.1"
+    section: "V14.1"
+    level: 2
+    rule: "All sensitive data created and processed by the application has been identified and classified into protection levels. This includes data that is only encoded and therefore easily decoded, such as Base64 strings or the plaintext payload inside a JWT. Protection levels need to take into account any data protection and privacy regulations and standards which the application is required to comply with."
+    cwe:
+      id: 213
+      name: "Exposure of Sensitive Information Due to Incompatible Policies"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/213.html"
+  - id: "ASVS-V14-14.1.2"
+    section: "V14.1"
+    level: 2
+    rule: "All sensitive data protection levels have a documented set of protection requirements. This must include (but not be limited to) requirements related to general encryption, integrity verification, retention, how the data is to be logged, access controls around sensitive data in logs, database-level encryption, privacy and privacy-enhancing technologies to be used, and other confidentiality requirements."
+  - id: "ASVS-V14-14.2.1"
+    section: "V14.2"
+    level: 1
+    rule: "Sensitive data is only sent to the server in the HTTP message body or header fields, and that the URL and query string do not contain sensitive information, such as an API key or session token."
+    cwe:
+      id: 598
+      name: "Use of HTTP Request With Sensitive Query String"
+      abstraction: "Variant"
+      url: "https://cwe.mitre.org/data/definitions/598.html"
+      note: "At a minimum, attackers can garner information from query strings that can be utilized in escalating their method of attack, such as information about the internal workings of the application or database column names. Successful exploitation of query string parameter vulnerabilities could lead to an attacker impersonating a legitimate user, obtaining proprietary data, or simply executing actions not intended by the application developers. Examples of sensitive information may include secrets such as session identifiers, passwords, access tokens, or API keys; Personally Identifiable Information (PII) such as email addresses or phone numbers; records or logs of private activities; communications that are expected to be private; etc. Successful exploitation of query string parameter vulnerabilities could lead to an attacker impersonating a legitimate user, obtaining proprietary data, or simply executing actions not intended by the application developers."
+  - id: "ASVS-V14-14.2.2"
+    section: "V14.2"
+    level: 2
+    rule: "The application prevents sensitive data from being cached in server components, such as load balancers and application caches, or ensures that the data is securely purged after use."
+    cwe:
+      id: 524
+      name: "Use of Cache Containing Sensitive Information"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/524.html"
+  - id: "ASVS-V14-14.2.3"
+    section: "V14.2"
+    level: 2
+    rule: "Defined sensitive data is not sent to untrusted parties (e.g., user trackers) to prevent unwanted collection of data outside of the application's control."
+    cwe:
+      id: 200
+      name: "Exposure of Sensitive Information to an Unauthorized Actor"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/200.html"
+  - id: "ASVS-V14-14.2.4"
+    section: "V14.2"
+    level: 2
+    rule: "Controls around sensitive data related to encryption, integrity verification, retention, how the data is to be logged, access controls around sensitive data in logs, privacy and privacy-enhancing technologies, are implemented as defined in the documentation for the specific data's protection level."
+  - id: "ASVS-V14-14.2.5"
+    section: "V14.2"
+    level: 3
+    rule: "Caching mechanisms are configured to only cache responses which have the expected content type for that resource and do not contain sensitive, dynamic content. The web server should return a 404 or 302 response when a non-existent file is accessed rather than returning a different, valid file. This should prevent Web Cache Deception attacks."
+    cwe:
+      id: 444
+      name: "Inconsistent Interpretation of HTTP Requests ('HTTP Request/Response Smuggling')"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/444.html"
+      note: "An attacker could create HTTP messages to exploit a number of weaknesses including 1) the message can trick the web server to associate a URL with another URL's webpage and caching the contents of the webpage (web cache poisoning attack), 2) the message can be structured to bypass the firewall protection mechanisms and gain unauthorized access to a web application, and 3) the message can invoke a script or a page that returns client credentials (similar to a Cross Site Scripting attack)."
+  - id: "ASVS-V14-14.2.6"
+    section: "V14.2"
+    level: 3
+    rule: "The application only returns the minimum required sensitive data for the application's functionality. For example, only returning some of the digits of a credit card number and not the full number. If the complete data is required, it should be masked in the user interface unless the user specifically views it."
+  - id: "ASVS-V14-14.2.7"
+    section: "V14.2"
+    level: 3
+    rule: "Sensitive information is subject to data retention classification, ensuring that outdated or unnecessary data is deleted automatically, on a defined schedule, or as the situation requires."
+  - id: "ASVS-V14-14.2.8"
+    section: "V14.2"
+    level: 3
+    rule: "Sensitive information is removed from the metadata of user-submitted files unless storage is consented to by the user."
+    cwe:
+      id: 212
+      name: "Improper Removal of Sensitive Information Before Storage or Transfer"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/212.html"
+      note: "Sensitive data may be exposed to an unauthorized actor in another control sphere. This may have a wide range of secondary consequences that will depend on what data is exposed. One possibility is the exposure of system data - such as file locations, software versions, or device data - that allow an attacker to craft a specific, more effective attack. Alternately, insufficient redaction of Private Personal Information (PPI), Personally Identifiable Information (PII), or other types of information might not harm the secure operation of the product itself, but could be violations of expectations by the product's users."
+  - id: "ASVS-V14-14.3.1"
+    section: "V14.3"
+    level: 1
+    rule: "Authenticated data is cleared from client storage, such as the browser DOM, after the client or session is terminated. The 'Clear-Site-Data' HTTP response header field may be able to help with this but the client-side should also be able to clear up if the server connection is not available when the session is terminated."
+    cwe:
+      id: 922
+      name: "Insecure Storage of Sensitive Information"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/922.html"
+      note: "Attackers can read sensitive information by accessing the unrestricted storage mechanism.\n\nAttackers can overwrite sensitive information by accessing the unrestricted storage mechanism."
+  - id: "ASVS-V14-14.3.2"
+    section: "V14.3"
+    level: 2
+    rule: "The application sets sufficient anti-caching HTTP response header fields (i.e., Cache-Control: no-store) so that sensitive data is not cached in browsers."
+    cwe:
+      id: 525
+      name: "Use of Web Browser Cache Containing Sensitive Information"
+      abstraction: "Variant"
+      url: "https://cwe.mitre.org/data/definitions/525.html"
+      note: "Browsers often store information in a client-side cache, which can leave behind sensitive information for other users to find and exploit, such as passwords or credit card numbers. The locations at most risk include public terminals, such as those in libraries and Internet cafes."
+  - id: "ASVS-V14-14.3.3"
+    section: "V14.3"
+    level: 2
+    rule: "Data stored in browser storage (such as localStorage, sessionStorage, IndexedDB, or cookies) does not contain sensitive data, with the exception of session tokens."
+    cwe:
+      id: 922
+      name: "Insecure Storage of Sensitive Information"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/922.html"
+      note: "Attackers can read sensitive information by accessing the unrestricted storage mechanism.\n\nAttackers can overwrite sensitive information by accessing the unrestricted storage mechanism."

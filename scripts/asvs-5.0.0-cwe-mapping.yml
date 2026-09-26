@@ -1,0 +1,628 @@
+# asvs-5.0.0-cwe-mapping.yml
+# OWASP ASVS 5.0.0 requirement id -> CWE id.
+#
+# Derived from two files in the OWASP ASVS repository (5.0/mappings/):
+#   v5.0.be_cwe_mapping.json        - CWE ids of the 5.0 "bleeding edge" draft, exported
+#                                     before CWE mappings were removed from the standard
+#   mapping_v5.0.be_to_v5.0.0.yml   - renumbering of 5.0.be ids to final 5.0.0 ids
+# ASVS 5.0.0 itself ships no CWE mapping, so treat this as indicative, not normative.
+# Requirements absent here had no CWE in the 5.0.be draft.
+#
+# Regenerate: see scripts/enrich-rules-with-cwe.py --help
+meta:
+  standard: "OWASP ASVS 5.0.0"
+  source: "https://github.com/OWASP/ASVS/tree/master/5.0/mappings"
+  entries: 204
+mapping:
+  - asvs: "1.1.1"
+    asvs_be: "5.6.1"
+    cwe: 174
+  - asvs: "1.1.2"
+    asvs_be: "5.6.2"
+    cwe: 116
+  - asvs: "1.2.1"
+    asvs_be: "5.3.1"
+    cwe: 116
+  - asvs: "1.2.2"
+    asvs_be: "5.3.13"
+    cwe: 116
+  - asvs: "1.2.4"
+    asvs_be: "5.3.4"
+    cwe: 89
+  - asvs: "1.2.5"
+    asvs_be: "5.3.8"
+    cwe: 78
+  - asvs: "1.2.6"
+    asvs_be: "5.3.7"
+    cwe: 90
+  - asvs: "1.2.7"
+    asvs_be: "5.3.10"
+    cwe: 643
+  - asvs: "1.2.9"
+    asvs_be: "5.2.9"
+    cwe: 624
+  - asvs: "1.2.10"
+    asvs_be: "5.3.11"
+    cwe: 1236
+  - asvs: "1.3.1"
+    asvs_be: "5.2.1"
+    cwe: 116
+  - asvs: "1.3.2"
+    asvs_be: "5.2.4"
+    cwe: 95
+  - asvs: "1.3.3"
+    asvs_be: "5.2.2"
+    cwe: 138
+  - asvs: "1.3.4"
+    asvs_be: "5.2.7"
+    cwe: 159
+  - asvs: "1.3.5"
+    asvs_be: "5.2.8"
+    cwe: 94
+  - asvs: "1.3.6"
+    asvs_be: "5.2.6"
+    cwe: 918
+  - asvs: "1.3.7"
+    asvs_be: "5.2.5"
+    cwe: 94
+  - asvs: "1.3.8"
+    asvs_be: "5.2.11"
+    cwe: 917
+  - asvs: "1.3.10"
+    asvs_be: "5.2.13"
+    cwe: 134
+  - asvs: "1.3.11"
+    asvs_be: "5.2.3"
+    cwe: 147
+  - asvs: "1.3.12"
+    asvs_be: "5.2.10"
+    cwe: 1333
+  - asvs: "1.4.1"
+    asvs_be: "5.4.1"
+    cwe: 120
+  - asvs: "1.4.2"
+    asvs_be: "5.4.3"
+    cwe: 190
+  - asvs: "1.4.3"
+    asvs_be: "5.4.4"
+    cwe: 416
+  - asvs: "1.5.1"
+    asvs_be: "5.5.2"
+    cwe: 611
+  - asvs: "1.5.2"
+    asvs_be: "5.5.3"
+    cwe: 502
+  - asvs: "1.5.3"
+    asvs_be: "5.5.5"
+    cwe: 436
+  - asvs: "2.1.1"
+    asvs_be: "1.11.5"
+    cwe: 20
+  - asvs: "2.1.2"
+    asvs_be: "1.11.6"
+    cwe: 20
+  - asvs: "2.2.1"
+    asvs_be: "11.3.1"
+    cwe: 20
+  - asvs: "2.2.2"
+    asvs_be: "11.3.2"
+    cwe: 602
+  - asvs: "2.2.3"
+    asvs_be: "11.3.3"
+    cwe: 20
+  - asvs: "2.3.1"
+    asvs_be: "11.1.1"
+    cwe: 841
+  - asvs: "2.4.1"
+    asvs_be: "11.2.2"
+    cwe: 770
+  - asvs: "2.4.2"
+    asvs_be: "11.2.1"
+    cwe: 799
+  - asvs: "3.2.3"
+    asvs_be: "10.4.2"
+    cwe: 79
+  - asvs: "3.3.1"
+    asvs_be: "50.2.1"
+    cwe: 614
+  - asvs: "3.3.2"
+    asvs_be: "50.2.3"
+    cwe: 1275
+  - asvs: "3.3.4"
+    asvs_be: "50.2.2"
+    cwe: 1004
+  - asvs: "3.4.1"
+    asvs_be: "50.3.3"
+    cwe: 523
+  - asvs: "3.4.2"
+    asvs_be: "50.3.6"
+    cwe: 183
+  - asvs: "3.4.4"
+    asvs_be: "50.3.2"
+    cwe: 116
+  - asvs: "3.4.5"
+    asvs_be: "50.3.4"
+    cwe: 116
+  - asvs: "3.4.6"
+    asvs_be: "50.3.5"
+    cwe: 1021
+  - asvs: "3.5.1"
+    asvs_be: "50.4.1"
+    cwe: 352
+  - asvs: "3.5.2"
+    asvs_be: "50.4.3"
+    cwe: 346
+  - asvs: "3.5.3"
+    asvs_be: "50.4.4"
+    cwe: 650
+  - asvs: "3.5.4"
+    asvs_be: "50.1.1"
+    cwe: 668
+  - asvs: "3.5.5"
+    asvs_be: "50.4.2"
+    cwe: 346
+  - asvs: "3.6.1"
+    asvs_be: "50.7.1"
+    cwe: 829
+  - asvs: "3.7.1"
+    asvs_be: "50.8.2"
+    cwe: 477
+  - asvs: "3.7.2"
+    asvs_be: "50.8.5"
+    cwe: 601
+  - asvs: "4.1.1"
+    asvs_be: "13.1.7"
+    cwe: 173
+  - asvs: "4.1.3"
+    asvs_be: "13.6.3"
+    cwe: 346
+  - asvs: "4.1.4"
+    asvs_be: "13.6.1"
+    cwe: 749
+  - asvs: "4.1.5"
+    asvs_be: "13.1.6"
+    cwe: 345
+  - asvs: "4.2.1"
+    asvs_be: "13.6.2"
+    cwe: 444
+  - asvs: "4.2.2"
+    asvs_be: "13.7.1"
+    cwe: 400
+  - asvs: "4.2.4"
+    asvs_be: "13.7.3"
+    cwe: 113
+  - asvs: "4.3.1"
+    asvs_be: "13.4.1"
+    cwe: 770
+  - asvs: "4.4.1"
+    asvs_be: "13.5.1"
+    cwe: 319
+  - asvs: "4.4.2"
+    asvs_be: "13.5.2"
+    cwe: 346
+  - asvs: "4.4.3"
+    asvs_be: "13.5.3"
+    cwe: 331
+  - asvs: "4.4.4"
+    asvs_be: "13.5.4"
+    cwe: 319
+  - asvs: "5.2.1"
+    asvs_be: "12.1.1"
+    cwe: 400
+  - asvs: "5.2.2"
+    asvs_be: "12.1.5"
+    cwe: 434
+  - asvs: "5.2.3"
+    asvs_be: "12.1.2"
+    cwe: 409
+  - asvs: "5.2.4"
+    asvs_be: "12.1.3"
+    cwe: 770
+  - asvs: "5.2.5"
+    asvs_be: "12.1.4"
+    cwe: 61
+  - asvs: "5.2.6"
+    asvs_be: "12.1.6"
+    cwe: 400
+  - asvs: "5.3.1"
+    asvs_be: "12.4.1"
+    cwe: 552
+  - asvs: "5.3.2"
+    asvs_be: "12.4.3"
+    cwe: 73
+  - asvs: "5.3.3"
+    asvs_be: "12.4.4"
+    cwe: 23
+  - asvs: "5.4.1"
+    asvs_be: "12.5.3"
+    cwe: 641
+  - asvs: "5.4.3"
+    asvs_be: "12.5.5"
+    cwe: 509
+  - asvs: "6.1.1"
+    asvs_be: "1.2.6"
+    cwe: 307
+  - asvs: "6.1.2"
+    asvs_be: "1.2.5"
+    cwe: 521
+  - asvs: "6.1.3"
+    asvs_be: "1.2.4"
+    cwe: 306
+  - asvs: "6.2.1"
+    asvs_be: "2.1.1"
+    cwe: 521
+  - asvs: "6.2.2"
+    asvs_be: "2.1.5"
+    cwe: 620
+  - asvs: "6.2.3"
+    asvs_be: "2.1.6"
+    cwe: 620
+  - asvs: "6.2.4"
+    asvs_be: "2.1.7"
+    cwe: 521
+  - asvs: "6.2.5"
+    asvs_be: "2.1.9"
+    cwe: 521
+  - asvs: "6.2.6"
+    asvs_be: "2.1.12"
+    cwe: 549
+  - asvs: "6.2.7"
+    asvs_be: "2.1.11"
+    cwe: 521
+  - asvs: "6.2.9"
+    asvs_be: "2.1.2"
+    cwe: 521
+  - asvs: "6.2.11"
+    asvs_be: "2.1.14"
+    cwe: 521
+  - asvs: "6.3.1"
+    asvs_be: "2.2.1"
+    cwe: 307
+  - asvs: "6.3.2"
+    asvs_be: "14.1.10"
+    cwe: 798
+  - asvs: "6.3.3"
+    asvs_be: "2.2.9"
+    cwe: 308
+  - asvs: "6.3.4"
+    asvs_be: "2.2.11"
+    cwe: 306
+  - asvs: "6.3.5"
+    asvs_be: "2.2.10"
+    cwe: 778
+  - asvs: "6.3.6"
+    asvs_be: "2.2.2"
+    cwe: 304
+  - asvs: "6.3.7"
+    asvs_be: "2.2.3"
+    cwe: 778
+  - asvs: "6.4.1"
+    asvs_be: "2.5.8"
+    cwe: 330
+  - asvs: "6.4.2"
+    asvs_be: "2.5.2"
+    cwe: 640
+  - asvs: "6.4.3"
+    asvs_be: "2.5.6"
+    cwe: 640
+  - asvs: "6.4.4"
+    asvs_be: "2.5.7"
+    cwe: 308
+  - asvs: "6.4.5"
+    asvs_be: "2.5.9"
+    cwe: 287
+  - asvs: "6.4.6"
+    asvs_be: "2.5.10"
+    cwe: 620
+  - asvs: "6.5.1"
+    asvs_be: "2.6.1"
+    cwe: 308
+  - asvs: "6.5.2"
+    asvs_be: "2.6.2"
+    cwe: 330
+  - asvs: "6.5.3"
+    asvs_be: "2.6.3"
+    cwe: 310
+  - asvs: "6.5.4"
+    asvs_be: "2.6.4"
+    cwe: 330
+  - asvs: "6.5.5"
+    asvs_be: "2.6.5"
+    cwe: 287
+  - asvs: "6.5.6"
+    asvs_be: "2.6.6"
+    cwe: 613
+  - asvs: "6.5.7"
+    asvs_be: "2.6.7"
+    cwe: 308
+  - asvs: "6.5.8"
+    asvs_be: "2.6.8"
+    cwe: 367
+  - asvs: "6.6.1"
+    asvs_be: "2.7.1"
+    cwe: 287
+  - asvs: "6.6.2"
+    asvs_be: "2.7.3"
+    cwe: 287
+  - asvs: "6.6.3"
+    asvs_be: "2.7.7"
+    cwe: 307
+  - asvs: "6.7.1"
+    asvs_be: "2.9.1"
+    cwe: 320
+  - asvs: "6.7.2"
+    asvs_be: "2.9.2"
+    cwe: 330
+  - asvs: "7.2.1"
+    asvs_be: "3.1.2"
+    cwe: 603
+  - asvs: "7.2.2"
+    asvs_be: "3.1.3"
+    cwe: 798
+  - asvs: "7.3.1"
+    asvs_be: "3.3.5"
+    cwe: 613
+  - asvs: "7.4.1"
+    asvs_be: "3.8.1"
+    cwe: 613
+  - asvs: "7.4.2"
+    asvs_be: "3.8.4"
+    cwe: 613
+  - asvs: "7.4.3"
+    asvs_be: "3.8.2"
+    cwe: 613
+  - asvs: "7.4.5"
+    asvs_be: "3.8.5"
+    cwe: 613
+  - asvs: "7.5.1"
+    asvs_be: "3.7.1"
+    cwe: 306
+  - asvs: "7.5.3"
+    asvs_be: "3.7.3"
+    cwe: 306
+  - asvs: "7.6.1"
+    asvs_be: "3.6.1"
+    cwe: 613
+  - asvs: "8.2.1"
+    asvs_be: "4.1.3"
+    cwe: 285
+  - asvs: "8.2.2"
+    asvs_be: "4.1.6"
+    cwe: 639
+  - asvs: "8.2.3"
+    asvs_be: "4.1.7"
+    cwe: 283
+  - asvs: "8.3.1"
+    asvs_be: "4.2.3"
+    cwe: 602
+  - asvs: "8.3.3"
+    asvs_be: "4.2.5"
+    cwe: 441
+  - asvs: "8.4.1"
+    asvs_be: "4.3.4"
+    cwe: 283
+  - asvs: "8.4.2"
+    asvs_be: "4.3.1"
+    cwe: 419
+  - asvs: "9.1.1"
+    asvs_be: "52.1.1"
+    cwe: 345
+  - asvs: "9.1.2"
+    asvs_be: "52.1.2"
+    cwe: 757
+  - asvs: "9.2.1"
+    asvs_be: "52.2.1"
+    cwe: 613
+  - asvs: "11.1.1"
+    asvs_be: "1.6.1"
+    cwe: 320
+  - asvs: "11.1.2"
+    asvs_be: "1.6.4"
+    cwe: 320
+  - asvs: "11.1.3"
+    asvs_be: "1.6.5"
+    cwe: 320
+  - asvs: "11.2.1"
+    asvs_be: "6.2.2"
+    cwe: 327
+  - asvs: "11.2.2"
+    asvs_be: "6.2.4"
+    cwe: 320
+  - asvs: "11.2.3"
+    asvs_be: "6.2.9"
+    cwe: 311
+  - asvs: "11.2.4"
+    asvs_be: "6.2.8"
+    cwe: 385
+  - asvs: "11.2.5"
+    asvs_be: "6.2.1"
+    cwe: 310
+  - asvs: "11.3.1"
+    asvs_be: "6.5.1"
+    cwe: 326
+  - asvs: "11.3.2"
+    asvs_be: "6.5.2"
+    cwe: 326
+  - asvs: "11.3.3"
+    asvs_be: "6.5.4"
+    cwe: 326
+  - asvs: "11.3.4"
+    asvs_be: "6.5.3"
+    cwe: 326
+  - asvs: "11.3.5"
+    asvs_be: "6.5.5"
+    cwe: 326
+  - asvs: "11.5.1"
+    asvs_be: "6.3.1"
+    cwe: 338
+  - asvs: "11.5.2"
+    asvs_be: "6.3.3"
+    cwe: 338
+  - asvs: "11.6.1"
+    asvs_be: "6.7.2"
+    cwe: 327
+  - asvs: "12.1.1"
+    asvs_be: "9.4.2"
+    cwe: 326
+  - asvs: "12.1.2"
+    asvs_be: "9.4.1"
+    cwe: 326
+  - asvs: "12.1.4"
+    asvs_be: "9.4.3"
+    cwe: 299
+  - asvs: "12.2.1"
+    asvs_be: "9.1.1"
+    cwe: 319
+  - asvs: "12.2.2"
+    asvs_be: "9.1.4"
+    cwe: 295
+  - asvs: "12.3.1"
+    asvs_be: "9.2.2"
+    cwe: 319
+  - asvs: "12.3.3"
+    asvs_be: "9.3.1"
+    cwe: 319
+  - asvs: "12.3.4"
+    asvs_be: "9.3.2"
+    cwe: 295
+  - asvs: "12.3.5"
+    asvs_be: "9.3.3"
+    cwe: 295
+  - asvs: "13.1.1"
+    asvs_be: "1.14.7"
+    cwe: 1059
+  - asvs: "13.2.1"
+    asvs_be: "14.7.1"
+    cwe: 287
+  - asvs: "13.2.2"
+    asvs_be: "14.7.5"
+    cwe: 272
+  - asvs: "13.2.3"
+    asvs_be: "14.7.2"
+    cwe: 255
+  - asvs: "13.2.4"
+    asvs_be: "14.7.3"
+    cwe: 732
+  - asvs: "13.2.5"
+    asvs_be: "14.7.4"
+    cwe: 918
+  - asvs: "13.3.1"
+    asvs_be: "14.8.1"
+    cwe: 798
+  - asvs: "13.3.2"
+    asvs_be: "14.8.4"
+    cwe: 320
+  - asvs: "13.3.3"
+    asvs_be: "14.8.2"
+    cwe: 320
+  - asvs: "13.3.4"
+    asvs_be: "14.8.3"
+    cwe: 320
+  - asvs: "13.4.2"
+    asvs_be: "14.3.2"
+    cwe: 497
+  - asvs: "13.4.3"
+    asvs_be: "14.3.4"
+    cwe: 548
+  - asvs: "13.4.4"
+    asvs_be: "14.3.6"
+    cwe: 749
+  - asvs: "13.4.5"
+    asvs_be: "14.1.6"
+    cwe: 1002
+  - asvs: "13.4.6"
+    asvs_be: "14.3.3"
+    cwe: 200
+  - asvs: "13.4.7"
+    asvs_be: "14.3.5"
+    cwe: 552
+  - asvs: "14.1.1"
+    asvs_be: "1.8.1"
+    cwe: 213
+  - asvs: "14.2.1"
+    asvs_be: "8.1.11"
+    cwe: 598
+  - asvs: "14.2.2"
+    asvs_be: "8.1.1"
+    cwe: 524
+  - asvs: "14.2.3"
+    asvs_be: "8.1.8"
+    cwe: 200
+  - asvs: "14.2.5"
+    asvs_be: "8.1.7"
+    cwe: 444
+  - asvs: "14.2.8"
+    asvs_be: "8.3.9"
+    cwe: 212
+  - asvs: "14.3.1"
+    asvs_be: "8.2.3"
+    cwe: 922
+  - asvs: "14.3.2"
+    asvs_be: "8.2.1"
+    cwe: 525
+  - asvs: "14.3.3"
+    asvs_be: "8.2.2"
+    cwe: 922
+  - asvs: "15.1.4"
+    asvs_be: "1.10.3"
+    cwe: 1061
+  - asvs: "15.2.4"
+    asvs_be: "10.6.2"
+    cwe: 427
+  - asvs: "15.3.3"
+    asvs_be: "10.4.4"
+    cwe: 915
+  - asvs: "15.3.4"
+    asvs_be: "10.4.6"
+    cwe: 348
+  - asvs: "15.3.5"
+    asvs_be: "10.4.1"
+    cwe: 843
+  - asvs: "15.3.7"
+    asvs_be: "10.4.7"
+    cwe: 235
+  - asvs: "15.4.1"
+    asvs_be: "10.7.1"
+    cwe: 362
+  - asvs: "15.4.2"
+    asvs_be: "10.7.3"
+    cwe: 367
+  - asvs: "15.4.3"
+    asvs_be: "10.7.4"
+    cwe: 833
+  - asvs: "15.4.4"
+    asvs_be: "10.7.5"
+    cwe: 410
+  - asvs: "16.1.1"
+    asvs_be: "1.7.3"
+    cwe: 778
+  - asvs: "16.2.1"
+    asvs_be: "7.1.4"
+    cwe: 778
+  - asvs: "16.2.5"
+    asvs_be: "7.1.1"
+    cwe: 532
+  - asvs: "16.3.1"
+    asvs_be: "7.2.1"
+    cwe: 778
+  - asvs: "16.3.2"
+    asvs_be: "7.2.2"
+    cwe: 285
+  - asvs: "16.3.3"
+    asvs_be: "7.2.3"
+    cwe: 778
+  - asvs: "16.3.4"
+    asvs_be: "7.2.6"
+    cwe: 778
+  - asvs: "16.4.1"
+    asvs_be: "7.3.1"
+    cwe: 117
+  - asvs: "16.4.2"
+    asvs_be: "7.3.3"
+    cwe: 200
+  - asvs: "16.5.1"
+    asvs_be: "7.4.1"
+    cwe: 210
+  - asvs: "16.5.4"
+    asvs_be: "7.4.3"
+    cwe: 431

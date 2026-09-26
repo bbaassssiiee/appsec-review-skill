@@ -1,0 +1,13 @@
+{
+  "name": "asvs-skill",
+  "owner": {
+    "name": "Bas Meijer"
+  },
+  "plugins": [
+    {
+      "name": "asvs",
+      "source": "./",
+      "description": "Verify code, designs and configuration against OWASP ASVS 5.0.0 (L1-L3)."
+    }
+  ]
+}

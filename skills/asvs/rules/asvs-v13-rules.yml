@@ -1,0 +1,198 @@
+# asvs-v13-rules.yml
+# Verifiable requirements distilled from OWASP ASVS 5.0.0 - V13 Configuration.
+meta:
+  prefix: "ASVS"
+  standard: "OWASP ASVS 5.0.0"
+  source: "references/0x22-V13-Configuration.md"
+  chapter: "V13"
+  title: "Configuration"
+  requirements: 21
+  per_level: {L1: 1, L2: 12, L3: 8}
+  cwe:
+    mapped: 16
+    mapping: "scripts/asvs-5.0.0-cwe-mapping.yml (derived from OWASP ASVS 5.0.be, indicative only)"
+    catalogs:
+      - "cwe.xml: CWE 4.20 (2026-04-30), VIEW LIST: CWE-699: Software Development"
+      - "cwec_v4.20.xml: CWE 4.20 (2026-04-30), CWE"
+  sections:
+    - id: "V13.1"
+      title: "Configuration Documentation"
+    - id: "V13.2"
+      title: "Backend Communication Configuration"
+    - id: "V13.3"
+      title: "Secret Management"
+    - id: "V13.4"
+      title: "Unintended Information Leakage"
+rules:
+  - id: "ASVS-V13-13.1.1"
+    section: "V13.1"
+    level: 2
+    rule: "All communication needs for the application are documented. This must include external services which the application relies upon and cases where an end user might be able to provide an external location to which the application will then connect."
+    cwe:
+      id: 1059
+      name: "Insufficient Technical Documentation"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/1059.html"
+      note: "Without a method of verification, one cannot be sure that everything only functions as expected."
+  - id: "ASVS-V13-13.1.2"
+    section: "V13.1"
+    level: 3
+    rule: "For each service the application uses, the documentation defines the maximum number of concurrent connections (e.g., connection pool limits) and how the application behaves when that limit is reached, including any fallback or recovery mechanisms, to prevent denial of service conditions."
+  - id: "ASVS-V13-13.1.3"
+    section: "V13.1"
+    level: 3
+    rule: "The application documentation defines resource‑management strategies for every external system or service it uses (e.g., databases, file handles, threads, HTTP connections). This should include resource‑release procedures, timeout settings, failure handling, and where retry logic is implemented, specifying retry limits, delays, and back‑off algorithms. For synchronous HTTP request–response operations it should mandate short timeouts and either disable retries or strictly limit retries to prevent cascading delays and resource exhaustion."
+  - id: "ASVS-V13-13.1.4"
+    section: "V13.1"
+    level: 3
+    rule: "The application's documentation defines the secrets that are critical for the security of the application and a schedule for rotating them, based on the organization's threat model and business requirements."
+  - id: "ASVS-V13-13.2.1"
+    section: "V13.2"
+    level: 2
+    rule: "Communications between backend application components that don't support the application's standard user session mechanism, including APIs, middleware, and data layers, are authenticated. Authentication must use individual service accounts, short-term tokens, or certificate-based authentication and not unchanging credentials such as passwords, API keys, or shared accounts with privileged access."
+    cwe:
+      id: 287
+      name: "Improper Authentication"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/287.html"
+      note: "This weakness can lead to the exposure of resources or functionality to unintended actors, possibly providing attackers with sensitive information or even execute arbitrary code."
+  - id: "ASVS-V13-13.2.2"
+    section: "V13.2"
+    level: 2
+    rule: "Communications between backend application components, including local or operating system services, APIs, middleware, and data layers, are performed with accounts assigned the least necessary privileges."
+    cwe:
+      id: 272
+      name: "Least Privilege Violation"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/272.html"
+      note: "An attacker may be able to access resources with the elevated privilege that could not be accessed with the attacker's original privileges. This is particularly likely in conjunction with another flaw, such as a buffer overflow."
+  - id: "ASVS-V13-13.2.3"
+    section: "V13.2"
+    level: 2
+    rule: "If a credential has to be used for service authentication, the credential being used by the consumer is not a default credential (e.g., root/root or admin/admin)."
+    cwe:
+      id: 255
+      name: "Credentials Management Errors"
+      abstraction: "Category"
+      url: "https://cwe.mitre.org/data/definitions/255.html"
+  - id: "ASVS-V13-13.2.4"
+    section: "V13.2"
+    level: 2
+    rule: "An allowlist is used to define the external resources or systems with which the application is permitted to communicate (e.g., for outbound requests, data loads, or file access). This allowlist can be implemented at the application layer, web server, firewall, or a combination of different layers."
+    cwe:
+      id: 732
+      name: "Incorrect Permission Assignment for Critical Resource"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/732.html"
+      note: "An attacker may be able to read sensitive information from the associated resource, such as credentials or configuration information stored in a file.\n\nAn attacker may be able to modify critical properties of the associated resource to gain privileges, such as replacing a world-writable executable with a Trojan horse.\n\nAn attacker may be able to destroy or corrupt critical data in the associated resource, such as deletion of records from a database."
+  - id: "ASVS-V13-13.2.5"
+    section: "V13.2"
+    level: 2
+    rule: "The web or application server is configured with an allowlist of resources or systems to which the server can send requests or load data or files from."
+    cwe:
+      id: 918
+      name: "Server-Side Request Forgery (SSRF)"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/918.html"
+      note: "By providing URLs to unexpected hosts or ports, attackers can make it appear that the server is sending the request, possibly bypassing access controls such as firewalls that prevent the attackers from accessing the URLs directly. The server can be used as a proxy to conduct port scanning of hosts in internal networks, use other URLs such as that can access documents on the system (using file://), or use other protocols such as gopher:// or tftp://, which may provide greater control over the contents of requests."
+  - id: "ASVS-V13-13.2.6"
+    section: "V13.2"
+    level: 3
+    rule: "Where the application connects to separate services, it follows the documented configuration for each connection, such as maximum parallel connections, behavior when maximum allowed connections is reached, connection timeouts, and retry strategies."
+  - id: "ASVS-V13-13.3.1"
+    section: "V13.3"
+    level: 2
+    rule: "A secrets management solution, such as a key vault, is used to securely create, store, control access to, and destroy backend secrets. These could include passwords, key material, integrations with databases and third-party systems, keys and seeds for time-based tokens, other internal secrets, and API keys. Secrets must not be included in application source code or included in build artifacts. For an L3 application, this must involve a hardware-backed solution such as an HSM."
+    cwe:
+      id: 798
+      name: "Use of Hard-coded Credentials"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/798.html"
+      note: "If hard-coded passwords are used, it is almost certain that malicious users will gain access to the account in question. Any user of the product that hard-codes passwords may be able to extract the password. Client-side systems with hard-coded passwords pose even more of a threat, since the extraction of a password from a binary is usually very simple.\n\nThis weakness can lead to the exposure of resources or functionality to unintended actors, possibly providing attackers with sensitive information or even execute arbitrary code. If the password is ever discovered or published (a common occurrence on the Internet), then anybody with knowledge of this password can access the product. Finally, since all installations of the product will have the same password, even across different organizations, this enables massive attacks such as worms to take place."
+  - id: "ASVS-V13-13.3.2"
+    section: "V13.3"
+    level: 2
+    rule: "Access to secret assets adheres to the principle of least privilege."
+    cwe:
+      id: 320
+      name: "Key Management Errors"
+      abstraction: "Category"
+      url: "https://cwe.mitre.org/data/definitions/320.html"
+  - id: "ASVS-V13-13.3.3"
+    section: "V13.3"
+    level: 3
+    rule: "All cryptographic operations are performed using an isolated security module (such as a vault or hardware security module) to securely manage and protect key material from exposure outside of the security module."
+    cwe:
+      id: 320
+      name: "Key Management Errors"
+      abstraction: "Category"
+      url: "https://cwe.mitre.org/data/definitions/320.html"
+  - id: "ASVS-V13-13.3.4"
+    section: "V13.3"
+    level: 3
+    rule: "Secrets are configured to expire and be rotated based on the application's documentation."
+    cwe:
+      id: 320
+      name: "Key Management Errors"
+      abstraction: "Category"
+      url: "https://cwe.mitre.org/data/definitions/320.html"
+  - id: "ASVS-V13-13.4.1"
+    section: "V13.4"
+    level: 1
+    rule: "The application is deployed either without any source control metadata, including the .git or .svn folders, or in a way that these folders are inaccessible both externally and to the application itself."
+  - id: "ASVS-V13-13.4.2"
+    section: "V13.4"
+    level: 2
+    rule: "Debug modes are disabled for all components in production environments to prevent exposure of debugging features and information leakage."
+    cwe:
+      id: 497
+      name: "Exposure of Sensitive System Information to an Unauthorized Control Sphere"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/497.html"
+  - id: "ASVS-V13-13.4.3"
+    section: "V13.4"
+    level: 2
+    rule: "Web servers do not expose directory listings to clients unless explicitly intended."
+    cwe:
+      id: 548
+      name: "Exposure of Information Through Directory Listing"
+      abstraction: "Variant"
+      url: "https://cwe.mitre.org/data/definitions/548.html"
+      note: "Exposing the contents of a directory can lead to an attacker gaining access to source code or providing useful information for the attacker to devise exploits, such as creation times of files or any information that may be encoded in file names. The directory listing may also compromise private or confidential data."
+  - id: "ASVS-V13-13.4.4"
+    section: "V13.4"
+    level: 2
+    rule: "Using the HTTP TRACE method is not supported in production environments, to avoid potential information leakage."
+    cwe:
+      id: 749
+      name: "Exposed Dangerous Method or Function"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/749.html"
+      note: "Exposing critical functionality essentially provides an attacker with the privilege level of the exposed functionality. This could result in the modification or exposure of sensitive data or possibly even execution of arbitrary code."
+  - id: "ASVS-V13-13.4.5"
+    section: "V13.4"
+    level: 2
+    rule: "Documentation (such as for internal APIs) and monitoring endpoints are not exposed unless explicitly intended."
+    cwe:
+      id: 1002
+      name: "SFP Secondary Cluster: Unexpected Entry Points"
+      abstraction: "Category"
+      url: "https://cwe.mitre.org/data/definitions/1002.html"
+  - id: "ASVS-V13-13.4.6"
+    section: "V13.4"
+    level: 3
+    rule: "The application does not expose detailed version information of backend components."
+    cwe:
+      id: 200
+      name: "Exposure of Sensitive Information to an Unauthorized Actor"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/200.html"
+  - id: "ASVS-V13-13.4.7"
+    section: "V13.4"
+    level: 3
+    rule: "The web tier is configured to only serve files with specific file extensions to prevent unintentional information, configuration, and source code leakage."
+    cwe:
+      id: 552
+      name: "Files or Directories Accessible to External Parties"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/552.html"

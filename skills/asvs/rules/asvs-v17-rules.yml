@@ -1,0 +1,72 @@
+# asvs-v17-rules.yml
+# Verifiable requirements distilled from OWASP ASVS 5.0.0 - V17 WebRTC.
+meta:
+  prefix: "ASVS"
+  standard: "OWASP ASVS 5.0.0"
+  source: "references/0x26-V17-WebRTC.md"
+  chapter: "V17"
+  title: "WebRTC"
+  requirements: 12
+  per_level: {L1: 0, L2: 7, L3: 5}
+  cwe:
+    mapped: 0
+    mapping: "scripts/asvs-5.0.0-cwe-mapping.yml (derived from OWASP ASVS 5.0.be, indicative only)"
+    catalogs:
+      - "cwe.xml: CWE 4.20 (2026-04-30), VIEW LIST: CWE-699: Software Development"
+      - "cwec_v4.20.xml: CWE 4.20 (2026-04-30), CWE"
+  sections:
+    - id: "V17.1"
+      title: "TURN Server"
+    - id: "V17.2"
+      title: "Media"
+    - id: "V17.3"
+      title: "Signaling"
+rules:
+  - id: "ASVS-V17-17.1.1"
+    section: "V17.1"
+    level: 2
+    rule: "The Traversal Using Relays around NAT (TURN) service only allows access to IP addresses that are not reserved for special purposes (e.g., internal networks, broadcast, loopback). Note that this applies to both IPv4 and IPv6 addresses."
+  - id: "ASVS-V17-17.1.2"
+    section: "V17.1"
+    level: 3
+    rule: "The Traversal Using Relays around NAT (TURN) service is not susceptible to resource exhaustion when legitimate users attempt to open a large number of ports on the TURN server."
+  - id: "ASVS-V17-17.2.1"
+    section: "V17.2"
+    level: 2
+    rule: "The key for the Datagram Transport Layer Security (DTLS) certificate is managed and protected based on the documented policy for management of cryptographic keys."
+  - id: "ASVS-V17-17.2.2"
+    section: "V17.2"
+    level: 2
+    rule: "The media server is configured to use and support approved Datagram Transport Layer Security (DTLS) cipher suites and a secure protection profile for the DTLS Extension for establishing keys for the Secure Real-time Transport Protocol (DTLS-SRTP)."
+  - id: "ASVS-V17-17.2.3"
+    section: "V17.2"
+    level: 2
+    rule: "Secure Real-time Transport Protocol (SRTP) authentication is checked at the media server to prevent Real-time Transport Protocol (RTP) injection attacks from leading to either a Denial of Service condition or audio or video media insertion into media streams."
+  - id: "ASVS-V17-17.2.4"
+    section: "V17.2"
+    level: 2
+    rule: "The media server is able to continue processing incoming media traffic when encountering malformed Secure Real-time Transport Protocol (SRTP) packets."
+  - id: "ASVS-V17-17.2.5"
+    section: "V17.2"
+    level: 3
+    rule: "The media server is able to continue processing incoming media traffic during a flood of Secure Real-time Transport Protocol (SRTP) packets from legitimate users."
+  - id: "ASVS-V17-17.2.6"
+    section: "V17.2"
+    level: 3
+    rule: "The media server is not susceptible to the \"ClientHello\" Race Condition vulnerability in Datagram Transport Layer Security (DTLS) by checking if the media server is publicly known to be vulnerable or by performing the race condition test."
+  - id: "ASVS-V17-17.2.7"
+    section: "V17.2"
+    level: 3
+    rule: "Any audio or video recording mechanisms associated with the media server are able to continue processing incoming media traffic during a flood of Secure Real-time Transport Protocol (SRTP) packets from legitimate users."
+  - id: "ASVS-V17-17.2.8"
+    section: "V17.2"
+    level: 3
+    rule: "The Datagram Transport Layer Security (DTLS) certificate is checked against the Session Description Protocol (SDP) fingerprint attribute, terminating the media stream if the check fails, to ensure the authenticity of the media stream."
+  - id: "ASVS-V17-17.3.1"
+    section: "V17.3"
+    level: 2
+    rule: "The signaling server is able to continue processing legitimate incoming signaling messages during a flood attack. This should be achieved by implementing rate limiting at the signaling level."
+  - id: "ASVS-V17-17.3.2"
+    section: "V17.3"
+    level: 2
+    rule: "The signaling server is able to continue processing legitimate signaling messages when encountering malformed signaling message that could cause a denial of service condition. This could include implementing input validation, safely handling integer overflows, preventing buffer overflows, and employing other robust error-handling techniques."

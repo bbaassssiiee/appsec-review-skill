@@ -1,0 +1,255 @@
+# asvs-v3-rules.yml
+# Verifiable requirements distilled from OWASP ASVS 5.0.0 - V3 Web Frontend Security.
+meta:
+  prefix: "ASVS"
+  standard: "OWASP ASVS 5.0.0"
+  source: "references/0x12-V3-Web-Frontend-Security.md"
+  chapter: "V3"
+  title: "Web Frontend Security"
+  requirements: 31
+  per_level: {L1: 8, L2: 11, L3: 12}
+  cwe:
+    mapped: 17
+    mapping: "scripts/asvs-5.0.0-cwe-mapping.yml (derived from OWASP ASVS 5.0.be, indicative only)"
+    catalogs:
+      - "cwe.xml: CWE 4.20 (2026-04-30), VIEW LIST: CWE-699: Software Development"
+      - "cwec_v4.20.xml: CWE 4.20 (2026-04-30), CWE"
+  sections:
+    - id: "V3.1"
+      title: "Web Frontend Security Documentation"
+    - id: "V3.2"
+      title: "Unintended Content Interpretation"
+    - id: "V3.3"
+      title: "Cookie Setup"
+    - id: "V3.4"
+      title: "Browser Security Mechanism Headers"
+    - id: "V3.5"
+      title: "Browser Origin Separation"
+    - id: "V3.6"
+      title: "External Resource Integrity"
+    - id: "V3.7"
+      title: "Other Browser Security Considerations"
+rules:
+  - id: "ASVS-V3-3.1.1"
+    section: "V3.1"
+    level: 3
+    rule: "Application documentation states the expected security features that browsers using the application must support (such as HTTPS, HTTP Strict Transport Security (HSTS), Content Security Policy (CSP), and other relevant HTTP security mechanisms). It must also define how the application must behave when some of these features are not available (such as warning the user or blocking access)."
+  - id: "ASVS-V3-3.2.1"
+    section: "V3.2"
+    level: 1
+    rule: "Security controls are in place to prevent browsers from rendering content or functionality in HTTP responses in an incorrect context (e.g., when an API, a user-uploaded file or other resource is requested directly). Possible controls could include: not serving the content unless HTTP request header fields (such as Sec-Fetch-\\*) indicate it is the correct context, using the sandbox directive of the Content-Security-Policy header field or using the attachment disposition type in the Content-Disposition header field."
+  - id: "ASVS-V3-3.2.2"
+    section: "V3.2"
+    level: 1
+    rule: "Content intended to be displayed as text, rather than rendered as HTML, is handled using safe rendering functions (such as createTextNode or textContent) to prevent unintended execution of content such as HTML or JavaScript."
+  - id: "ASVS-V3-3.2.3"
+    section: "V3.2"
+    level: 3
+    rule: "The application avoids DOM clobbering when using client-side JavaScript by employing explicit variable declarations, performing strict type checking, avoiding storing global variables on the document object, and implementing namespace isolation."
+    cwe:
+      id: 79
+      name: "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/79.html"
+      note: "The most common attack performed with cross-site scripting involves the disclosure of private information stored in user cookies, such as session information. Typically, a malicious user will craft a client-side script, which -- when parsed by a web browser -- performs some activity on behalf of the victim to an attacker-controlled system (such as sending all site cookies to a given E-mail address). This could be especially dangerous to the site if the victim has administrator privileges to manage that site. This script will be loaded and run by each user visiting the web site. Since the site requesting to run the script has access to the cookies in question, the malicious script does also.\n\nIn some circumstances it may be possible to run arbitrary code on a victim's computer when cross-site scripting is combined with other flaws, for example, \"drive-by hacking.\"\n\nThe consequence of an XSS attack is the same regardless of whether it is stored or reflected. The difference is in how the payload arrives at the server. XSS can cause a variety of problems for the end user that range in severity from an annoyance to complete account compromise. Some cross-site scripting vulnerabilities can be exploited to manipulate or steal cookies, create requests that can be mistaken for those of a valid user, compromise confidential information, or execute malicious code on the end user systems for a variety of nefarious purposes. Other damaging attacks include the disclosure of end user files, installation of Trojan horse programs, redirecting the user to some other page or site, running \"Active X\" controls (under Microsoft Internet Explorer) from sites that a user perceives as trustworthy, and modifying presentation of content."
+  - id: "ASVS-V3-3.3.1"
+    section: "V3.3"
+    level: 1
+    rule: "Cookies have the 'Secure' attribute set, and if the '\\__Host-' prefix is not used for the cookie name, the '__Secure-' prefix must be used for the cookie name."
+    cwe:
+      id: 614
+      name: "Sensitive Cookie in HTTPS Session Without 'Secure' Attribute"
+      abstraction: "Variant"
+      url: "https://cwe.mitre.org/data/definitions/614.html"
+      note: "Omitting the secure flag makes it possible for the user agent to send the cookies in plaintext over an HTTP session."
+  - id: "ASVS-V3-3.3.2"
+    section: "V3.3"
+    level: 2
+    rule: "Each cookie's 'SameSite' attribute value is set according to the purpose of the cookie, to limit exposure to user interface redress attacks and browser-based request forgery attacks, commonly known as cross-site request forgery (CSRF)."
+    cwe:
+      id: 1275
+      name: "Sensitive Cookie with Improper SameSite Attribute"
+      abstraction: "Variant"
+      url: "https://cwe.mitre.org/data/definitions/1275.html"
+      note: "If the website does not impose additional defense against CSRF attacks, failing to use the 'Lax' or 'Strict' values could increase the risk of exposure to CSRF attacks. The likelihood of the integrity breach is Low because a successful attack does not only depend on an insecure SameSite attribute. In order to perform a CSRF attack there are many conditions that must be met, such as the lack of CSRF tokens, no confirmations for sensitive actions on the website, a \"simple\" \"Content-Type\" header in the HTTP request and many more."
+  - id: "ASVS-V3-3.3.3"
+    section: "V3.3"
+    level: 2
+    rule: "Cookies have the '__Host-' prefix for the cookie name unless they are explicitly designed to be shared with other hosts."
+  - id: "ASVS-V3-3.3.4"
+    section: "V3.3"
+    level: 2
+    rule: "If the value of a cookie is not meant to be accessible to client-side scripts (such as a session token), the cookie must have the 'HttpOnly' attribute set and the same value (e. g. session token) must only be transferred to the client via the 'Set-Cookie' header field."
+    cwe:
+      id: 1004
+      name: "Sensitive Cookie Without 'HttpOnly' Flag"
+      abstraction: "Variant"
+      url: "https://cwe.mitre.org/data/definitions/1004.html"
+      note: "If the HttpOnly flag is not set, then sensitive information stored in the cookie may be exposed to unintended parties.\n\nIf the cookie in question is an authentication cookie, then not setting the HttpOnly flag may allow an adversary to steal authentication data (e.g., a session ID) and assume the identity of the user."
+  - id: "ASVS-V3-3.3.5"
+    section: "V3.3"
+    level: 3
+    rule: "When the application writes a cookie, the cookie name and value length combined are not over 4096 bytes. Overly large cookies will not be stored by the browser and therefore not sent with requests, preventing the user from using application functionality which relies on that cookie."
+  - id: "ASVS-V3-3.4.1"
+    section: "V3.4"
+    level: 1
+    rule: "A Strict-Transport-Security header field is included on all responses to enforce an HTTP Strict Transport Security (HSTS) policy. A maximum age of at least 1 year must be defined, and for L2 and up, the policy must apply to all subdomains as well."
+    cwe:
+      id: 523
+      name: "Unprotected Transport of Credentials"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/523.html"
+  - id: "ASVS-V3-3.4.2"
+    section: "V3.4"
+    level: 1
+    rule: "The Cross-Origin Resource Sharing (CORS) Access-Control-Allow-Origin header field is a fixed value by the application, or if the Origin HTTP request header field value is used, it is validated against an allowlist of trusted origins. When 'Access-Control-Allow-Origin: *' needs to be used, verify that the response does not include any sensitive information."
+    cwe:
+      id: 183
+      name: "Permissive List of Allowed Inputs"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/183.html"
+  - id: "ASVS-V3-3.4.3"
+    section: "V3.4"
+    level: 2
+    rule: "HTTP responses include a Content-Security-Policy response header field which defines directives to ensure the browser only loads and executes trusted content or resources, in order to limit execution of malicious JavaScript. As a minimum, a global policy must be used which includes the directives object-src 'none' and base-uri 'none' and defines either an allowlist or uses nonces or hashes. For an L3 application, a per-response policy with nonces or hashes must be defined."
+  - id: "ASVS-V3-3.4.4"
+    section: "V3.4"
+    level: 2
+    rule: "All HTTP responses contain an 'X-Content-Type-Options: nosniff' header field. This instructs browsers not to use content sniffing and MIME type guessing for the given response, and to require the response's Content-Type header field value to match the destination resource. For example, the response to a request for a style is only accepted if the response's Content-Type is 'text/css'. This also enables the use of the Cross-Origin Read Blocking (CORB) functionality by the browser."
+    cwe:
+      id: 116
+      name: "Improper Encoding or Escaping of Output"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/116.html"
+      note: "The communications between components can be modified in unexpected ways. Unexpected commands can be executed, bypassing other security mechanisms. Incoming data can be misinterpreted."
+  - id: "ASVS-V3-3.4.5"
+    section: "V3.4"
+    level: 2
+    rule: "The application sets a referrer policy to prevent leakage of technically sensitive data to third-party services via the 'Referer' HTTP request header field. This can be done using the Referrer-Policy HTTP response header field or via HTML element attributes. Sensitive data could include path and query data in the URL, and for internal non-public applications also the hostname."
+    cwe:
+      id: 116
+      name: "Improper Encoding or Escaping of Output"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/116.html"
+      note: "The communications between components can be modified in unexpected ways. Unexpected commands can be executed, bypassing other security mechanisms. Incoming data can be misinterpreted."
+  - id: "ASVS-V3-3.4.6"
+    section: "V3.4"
+    level: 2
+    rule: "The web application uses the frame-ancestors directive of the Content-Security-Policy header field for every HTTP response to ensure that it cannot be embedded by default and that embedding of specific resources is allowed only when necessary. Note that the X-Frame-Options header field, although supported by browsers, is obsolete and may not be relied upon."
+    cwe:
+      id: 1021
+      name: "Improper Restriction of Rendered UI Layers or Frames"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/1021.html"
+      note: "An attacker can trick a user into performing actions that are masked and hidden from the user's view. The impact varies widely, depending on the functionality of the underlying application. For example, in a social media application, clickjacking could be used to trick the user into changing privacy settings."
+  - id: "ASVS-V3-3.4.7"
+    section: "V3.4"
+    level: 3
+    rule: "The Content-Security-Policy header field specifies a location to report violations."
+  - id: "ASVS-V3-3.4.8"
+    section: "V3.4"
+    level: 3
+    rule: "All HTTP responses that initiate a document rendering (such as responses with Content-Type text/html), include the Cross‑Origin‑Opener‑Policy header field with the same-origin directive or the same-origin-allow-popups directive as required. This prevents attacks that abuse shared access to Window objects, such as tabnabbing and frame counting."
+  - id: "ASVS-V3-3.5.1"
+    section: "V3.5"
+    level: 1
+    rule: "Verify that, if the application does not rely on the CORS preflight mechanism to prevent disallowed cross-origin requests to use sensitive functionality, these requests are validated to ensure they originate from the application itself. This may be done by using and validating anti-forgery tokens or requiring extra HTTP header fields that are not CORS-safelisted request-header fields. This is to defend against browser-based request forgery attacks, commonly known as cross-site request forgery (CSRF)."
+    cwe:
+      id: 352
+      name: "Cross-Site Request Forgery (CSRF)"
+      abstraction: "Compound"
+      url: "https://cwe.mitre.org/data/definitions/352.html"
+      note: "The consequences will vary depending on the nature of the functionality that is vulnerable to CSRF. An attacker could trick a client into making an unintentional request to the web server via a URL, image load, XMLHttpRequest, etc., which would then be treated as an authentic request from the client - effectively performing any operations as the victim, leading to an exposure of data, unintended code execution, etc. If the victim is an administrator or privileged user, the consequences may include obtaining complete control over the web application - deleting or stealing data, uninstalling the product, or using it to launch other attacks against all of the product's users. Because the attacker has the identity of the victim, the scope of CSRF is limited only by the victim's privileges."
+  - id: "ASVS-V3-3.5.2"
+    section: "V3.5"
+    level: 1
+    rule: "Verify that, if the application relies on the CORS preflight mechanism to prevent disallowed cross-origin use of sensitive functionality, it is not possible to call the functionality with a request which does not trigger a CORS-preflight request. This may require checking the values of the 'Origin' and 'Content-Type' request header fields or using an extra header field that is not a CORS-safelisted header-field."
+    cwe:
+      id: 346
+      name: "Origin Validation Error"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/346.html"
+      note: "An attacker can access any functionality that is inadvertently accessible to the source."
+  - id: "ASVS-V3-3.5.3"
+    section: "V3.5"
+    level: 1
+    rule: "HTTP requests to sensitive functionality use appropriate HTTP methods such as POST, PUT, PATCH, or DELETE, and not methods defined by the HTTP specification as \"safe\" such as HEAD, OPTIONS, or GET. Alternatively, strict validation of the Sec-Fetch-* request header fields can be used to ensure that the request did not originate from an inappropriate cross-origin call, a navigation request, or a resource load (such as an image source) where this is not expected."
+    cwe:
+      id: 650
+      name: "Trusting HTTP Permission Methods on the Server Side"
+      abstraction: "Variant"
+      url: "https://cwe.mitre.org/data/definitions/650.html"
+      note: "An attacker could escalate privileges.\n\nAn attacker could modify resources.\n\nAn attacker could obtain sensitive information."
+  - id: "ASVS-V3-3.5.4"
+    section: "V3.5"
+    level: 2
+    rule: "Separate applications are hosted on different hostnames to leverage the restrictions provided by same-origin policy, including how documents or scripts loaded by one origin can interact with resources from another origin and hostname-based restrictions on cookies."
+    cwe:
+      id: 668
+      name: "Exposure of Resource to Wrong Sphere"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/668.html"
+      note: "An adversary that gains access to a resource exposed to a wrong sphere could potentially retrieve private data from that resource, thus breaking the intended confidentiality of that data.\n\nAn adversary that gains access to a resource exposed to a wrong sphere could potentially modify data held within that resource, thus breaking the intended integrity of that data and causing the system relying on that resource to make unintended decisions.\n\nThe consequences may vary widely depending on how the product uses the affected resource."
+  - id: "ASVS-V3-3.5.5"
+    section: "V3.5"
+    level: 2
+    rule: "Messages received by the postMessage interface are discarded if the origin of the message is not trusted, or if the syntax of the message is invalid."
+    cwe:
+      id: 346
+      name: "Origin Validation Error"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/346.html"
+      note: "An attacker can access any functionality that is inadvertently accessible to the source."
+  - id: "ASVS-V3-3.5.6"
+    section: "V3.5"
+    level: 3
+    rule: "JSONP functionality is not enabled anywhere across the application to avoid Cross-Site Script Inclusion (XSSI) attacks."
+  - id: "ASVS-V3-3.5.7"
+    section: "V3.5"
+    level: 3
+    rule: "Data requiring authorization is not included in script resource responses, like JavaScript files, to prevent Cross-Site Script Inclusion (XSSI) attacks."
+  - id: "ASVS-V3-3.5.8"
+    section: "V3.5"
+    level: 3
+    rule: "Authenticated resources (such as images, videos, scripts, and other documents) can be loaded or embedded on behalf of the user only when intended. This can be accomplished by strict validation of the Sec-Fetch-* HTTP request header fields to ensure that the request did not originate from an inappropriate cross-origin call, or by setting a restrictive Cross-Origin-Resource-Policy HTTP response header field to instruct the browser to block returned content."
+  - id: "ASVS-V3-3.6.1"
+    section: "V3.6"
+    level: 3
+    rule: "Client-side assets, such as JavaScript libraries, CSS, or web fonts, are only hosted externally (e.g., on a Content Delivery Network) if the resource is static and versioned and Subresource Integrity (SRI) is used to validate the integrity of the asset. If this is not possible, there should be a documented security decision to justify this for each resource."
+    cwe:
+      id: 829
+      name: "Inclusion of Functionality from Untrusted Control Sphere"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/829.html"
+      note: "An attacker could insert malicious functionality into the program by causing the program to download code that the attacker has placed into the untrusted control sphere, such as a malicious web site. This could enable the injection of malware, information exposure by granting excessive privileges or permissions to the untrusted functionality, DOM-based XSS vulnerabilities, stealing user's cookies, open redirect to malware (CWE-601), etc."
+  - id: "ASVS-V3-3.7.1"
+    section: "V3.7"
+    level: 2
+    rule: "The application only uses client-side technologies which are still supported and considered secure. Examples of technologies which do not meet this requirement include NSAPI plugins, Flash, Shockwave, ActiveX, Silverlight, NACL, or client-side Java applets."
+    cwe:
+      id: 477
+      name: "Use of Obsolete Function"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/477.html"
+  - id: "ASVS-V3-3.7.2"
+    section: "V3.7"
+    level: 2
+    rule: "The application will only automatically redirect the user to a different hostname or domain (which is not controlled by the application) where the destination appears on an allowlist."
+    cwe:
+      id: 601
+      name: "URL Redirection to Untrusted Site ('Open Redirect')"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/601.html"
+      note: "The user may be redirected to an untrusted page that contains malware which may then compromise the user's system. In some cases, an open redirect can also enable the immediate download of a file without the user's permission, because the redirection to an external site may lead to endpoints on those sites that automatically trigger a download action (\"drive-by download\" [REF-1478]). This will expose the user to extensive risk. The user's interaction with the web server may also be compromised if the malware conducts keylogging or other attacks that steal credentials, personally identifiable information (PII), or other important data.\n\nBy modifying the URL value to a malicious site, an attacker may successfully launch a phishing scam. The user may be subjected to phishing attacks by being redirected to an untrusted page. The phishing attack may point to an attacker controlled web page that appears to be a trusted web site. The phishers may then steal the user's credentials and then use these credentials to access the legitimate web site. Because the server name in the modified link is identical to the original site, phishing attempts have a more trustworthy appearance."
+  - id: "ASVS-V3-3.7.3"
+    section: "V3.7"
+    level: 3
+    rule: "The application shows a notification when the user is being redirected to a URL outside of the application's control, with an option to cancel the navigation."
+  - id: "ASVS-V3-3.7.4"
+    section: "V3.7"
+    level: 3
+    rule: "The application's top-level domain (e.g., site.tld) is added to the public preload list for HTTP Strict Transport Security (HSTS). This ensures that the use of TLS for the application is built directly into the main browsers, rather than relying only on the Strict-Transport-Security response header field."
+  - id: "ASVS-V3-3.7.5"
+    section: "V3.7"
+    level: 3
+    rule: "The application behaves as documented (such as warning the user or blocking access) if the browser used to access the application does not support the expected security features."

@@ -1,0 +1,160 @@
+# asvs-v4-rules.yml
+# Verifiable requirements distilled from OWASP ASVS 5.0.0 - V4 API and Web Service.
+meta:
+  prefix: "ASVS"
+  standard: "OWASP ASVS 5.0.0"
+  source: "references/0x13-V4-API-and-Web-Service.md"
+  chapter: "V4"
+  title: "API and Web Service"
+  requirements: 16
+  per_level: {L1: 2, L2: 8, L3: 6}
+  cwe:
+    mapped: 12
+    mapping: "scripts/asvs-5.0.0-cwe-mapping.yml (derived from OWASP ASVS 5.0.be, indicative only)"
+    catalogs:
+      - "cwe.xml: CWE 4.20 (2026-04-30), VIEW LIST: CWE-699: Software Development"
+      - "cwec_v4.20.xml: CWE 4.20 (2026-04-30), CWE"
+  sections:
+    - id: "V4.1"
+      title: "Generic Web Service Security"
+    - id: "V4.2"
+      title: "HTTP Message Structure Validation"
+    - id: "V4.3"
+      title: "GraphQL"
+    - id: "V4.4"
+      title: "WebSocket"
+rules:
+  - id: "ASVS-V4-4.1.1"
+    section: "V4.1"
+    level: 1
+    rule: "Every HTTP response with a message body contains a Content-Type header field that matches the actual content of the response, including the charset parameter to specify safe character encoding (e.g., UTF-8, ISO-8859-1) according to IANA Media Types, such as \"text/\", \"/+xml\" and \"/xml\"."
+    cwe:
+      id: 173
+      name: "Improper Handling of Alternate Encoding"
+      abstraction: "Variant"
+      url: "https://cwe.mitre.org/data/definitions/173.html"
+  - id: "ASVS-V4-4.1.2"
+    section: "V4.1"
+    level: 2
+    rule: "Only user-facing endpoints (intended for manual web-browser access) automatically redirect from HTTP to HTTPS, while other services or endpoints do not implement transparent redirects. This is to avoid a situation where a client is erroneously sending unencrypted HTTP requests, but since the requests are being automatically redirected to HTTPS, the leakage of sensitive data goes undiscovered."
+  - id: "ASVS-V4-4.1.3"
+    section: "V4.1"
+    level: 2
+    rule: "Any HTTP header field used by the application and set by an intermediary layer, such as a load balancer, a web proxy, or a backend-for-frontend service, cannot be overridden by the end-user. Example headers might include X-Real-IP, X-Forwarded-*, or X-User-ID."
+    cwe:
+      id: 346
+      name: "Origin Validation Error"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/346.html"
+      note: "An attacker can access any functionality that is inadvertently accessible to the source."
+  - id: "ASVS-V4-4.1.4"
+    section: "V4.1"
+    level: 3
+    rule: "Only HTTP methods that are explicitly supported by the application or its API (including OPTIONS during preflight requests) can be used and that unused methods are blocked."
+    cwe:
+      id: 749
+      name: "Exposed Dangerous Method or Function"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/749.html"
+      note: "Exposing critical functionality essentially provides an attacker with the privilege level of the exposed functionality. This could result in the modification or exposure of sensitive data or possibly even execution of arbitrary code."
+  - id: "ASVS-V4-4.1.5"
+    section: "V4.1"
+    level: 3
+    rule: "Per-message digital signatures are used to provide additional assurance on top of transport protections for requests or transactions which are highly sensitive or which traverse a number of systems."
+    cwe:
+      id: 345
+      name: "Insufficient Verification of Data Authenticity"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/345.html"
+  - id: "ASVS-V4-4.2.1"
+    section: "V4.2"
+    level: 2
+    rule: "All application components (including load balancers, firewalls, and application servers) determine boundaries of incoming HTTP messages using the appropriate mechanism for the HTTP version to prevent HTTP request smuggling. In HTTP/1.x, if a Transfer-Encoding header field is present, the Content-Length header must be ignored per RFC 2616. When using HTTP/2 or HTTP/3, if a Content-Length header field is present, the receiver must ensure that it is consistent with the length of the DATA frames."
+    cwe:
+      id: 444
+      name: "Inconsistent Interpretation of HTTP Requests ('HTTP Request/Response Smuggling')"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/444.html"
+      note: "An attacker could create HTTP messages to exploit a number of weaknesses including 1) the message can trick the web server to associate a URL with another URL's webpage and caching the contents of the webpage (web cache poisoning attack), 2) the message can be structured to bypass the firewall protection mechanisms and gain unauthorized access to a web application, and 3) the message can invoke a script or a page that returns client credentials (similar to a Cross Site Scripting attack)."
+  - id: "ASVS-V4-4.2.2"
+    section: "V4.2"
+    level: 3
+    rule: "When generating HTTP messages, the Content-Length header field does not conflict with the length of the content as determined by the framing of the HTTP protocol, in order to prevent request smuggling attacks."
+    cwe:
+      id: 400
+      name: "Uncontrolled Resource Consumption"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/400.html"
+      note: "If an attacker can trigger the allocation of the limited resources, but the number or size of the resources is not controlled, then the most common result is denial of service. This would prevent valid users from accessing the product, and it could potentially have an impact on the surrounding environment, i.e., the product may slow down, crash due to unhandled errors, or lock out legitimate users. For example, a memory exhaustion attack against an application could slow down the application as well as its host operating system.\n\nIn some cases it may be possible to force the product to \"fail open\" in the event of resource exhaustion. The state of the product -- and possibly the security functionality - may then be compromised."
+  - id: "ASVS-V4-4.2.3"
+    section: "V4.2"
+    level: 3
+    rule: "The application does not send nor accept HTTP/2 or HTTP/3 messages with connection-specific header fields such as Transfer-Encoding to prevent response splitting and header injection attacks."
+  - id: "ASVS-V4-4.2.4"
+    section: "V4.2"
+    level: 3
+    rule: "The application only accepts HTTP/2 and HTTP/3 requests where the header fields and values do not contain any CR (\\r), LF (\\n), or CRLF (\\r\\n) sequences, to prevent header injection attacks."
+    cwe:
+      id: 113
+      name: "Improper Neutralization of CRLF Sequences in HTTP Headers ('HTTP Request/Response Splitting')"
+      abstraction: "Variant"
+      url: "https://cwe.mitre.org/data/definitions/113.html"
+      note: "CR and LF characters in an HTTP header may give attackers control of the remaining headers and body of the message that the application intends to send/receive, as well as allowing them to create additional messages entirely under their control."
+  - id: "ASVS-V4-4.2.5"
+    section: "V4.2"
+    level: 3
+    rule: "Verify that, if the application (backend or frontend) builds and sends requests, it uses validation, sanitization, or other mechanisms to avoid creating URIs (such as for API calls) or HTTP request header fields (such as Authorization or Cookie), which are too long to be accepted by the receiving component. This could cause a denial of service, such as when sending an overly long request (e.g., a long cookie header field), which results in the server always responding with an error status."
+  - id: "ASVS-V4-4.3.1"
+    section: "V4.3"
+    level: 2
+    rule: "A query allowlist, depth limiting, amount limiting, or query cost analysis is used to prevent GraphQL or data layer expression Denial of Service (DoS) as a result of expensive, nested queries."
+    cwe:
+      id: 770
+      name: "Allocation of Resources Without Limits or Throttling"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/770.html"
+      note: "When allocating resources without limits, an attacker could prevent other systems, applications, or processes from accessing the same type of resource. It can be easy for an attacker to consume many resources by rapidly making many requests or causing larger resources to be used than is needed."
+  - id: "ASVS-V4-4.3.2"
+    section: "V4.3"
+    level: 2
+    rule: "GraphQL introspection queries are disabled in the production environment unless the GraphQL API is meant to be used by other parties."
+  - id: "ASVS-V4-4.4.1"
+    section: "V4.4"
+    level: 1
+    rule: "WebSocket over TLS (WSS) is used for all WebSocket connections."
+    cwe:
+      id: 319
+      name: "Cleartext Transmission of Sensitive Information"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/319.html"
+      note: "Anyone can read the information by gaining access to the channel being used for communication. Many communication channels can be \"sniffed\" (monitored) by adversaries during data transmission. For example, in networking, packets can traverse many intermediary nodes from the source to the destination, whether across the internet, an internal network, the cloud, etc. Some actors might have privileged access to a network interface or any link along the channel, such as a router, but they might not be authorized to collect the underlying data. As a result, network traffic could be sniffed by adversaries, spilling security-critical data.\n\nWhen full communications are recorded or logged, such as with a packet dump, an adversary could attempt to obtain the dump long after the transmission has occurred and try to \"sniff\" the cleartext from the recorded communications in the dump itself. Even if the information is encoded in a way that is not human-readable, certain techniques could determine which encoding is being used, then decode the information."
+  - id: "ASVS-V4-4.4.2"
+    section: "V4.4"
+    level: 2
+    rule: "Verify that, during the initial HTTP WebSocket handshake, the Origin header field is checked against a list of origins allowed for the application."
+    cwe:
+      id: 346
+      name: "Origin Validation Error"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/346.html"
+      note: "An attacker can access any functionality that is inadvertently accessible to the source."
+  - id: "ASVS-V4-4.4.3"
+    section: "V4.4"
+    level: 2
+    rule: "Verify that, if the application's standard session management cannot be used, dedicated tokens are being used for this, which comply with the relevant Session Management security requirements."
+    cwe:
+      id: 331
+      name: "Insufficient Entropy"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/331.html"
+      note: "An attacker could guess the random numbers generated and could gain unauthorized access to a system if the random numbers are used for authentication and authorization."
+  - id: "ASVS-V4-4.4.4"
+    section: "V4.4"
+    level: 2
+    rule: "Dedicated WebSocket session management tokens are initially obtained or validated through the previously authenticated HTTPS session when transitioning an existing HTTPS session to a WebSocket channel."
+    cwe:
+      id: 319
+      name: "Cleartext Transmission of Sensitive Information"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/319.html"
+      note: "Anyone can read the information by gaining access to the channel being used for communication. Many communication channels can be \"sniffed\" (monitored) by adversaries during data transmission. For example, in networking, packets can traverse many intermediary nodes from the source to the destination, whether across the internet, an internal network, the cloud, etc. Some actors might have privileged access to a network interface or any link along the channel, such as a router, but they might not be authorized to collect the underlying data. As a result, network traffic could be sniffed by adversaries, spilling security-critical data.\n\nWhen full communications are recorded or logged, such as with a packet dump, an adversary could attempt to obtain the dump long after the transmission has occurred and try to \"sniff\" the cleartext from the recorded communications in the dump itself. Even if the information is encoded in a way that is not human-readable, certain techniques could determine which encoding is being used, then decode the information."

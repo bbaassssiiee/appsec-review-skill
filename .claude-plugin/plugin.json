@@ -1,0 +1,12 @@
+{
+  "name": "asvs",
+  "version": "1.0.0",
+  "description": "Verify code, designs and configuration against OWASP ASVS 5.0.0 (L1-L3), with per-chapter rules and CWE references.",
+  "author": {
+    "name": "Bas Meijer"
+  },
+  "homepage": "https://github.com/bbaassssiiee/asvs-skill",
+  "repository": "https://github.com/bbaassssiiee/asvs-skill",
+  "license": "CC-BY-SA-4.0",
+  "keywords": ["security", "owasp", "asvs", "appsec", "code-review", "cwe"]
+}

@@ -1,0 +1,303 @@
+# asvs-v1-rules.yml
+# Verifiable requirements distilled from OWASP ASVS 5.0.0 - V1 Encoding and Sanitization.
+meta:
+  prefix: "ASVS"
+  standard: "OWASP ASVS 5.0.0"
+  source: "references/0x10-V1-Encoding-and-Sanitization.md"
+  chapter: "V1"
+  title: "Encoding and Sanitization"
+  requirements: 30
+  per_level: {L1: 8, L2: 19, L3: 3}
+  cwe:
+    mapped: 27
+    mapping: "scripts/asvs-5.0.0-cwe-mapping.yml (derived from OWASP ASVS 5.0.be, indicative only)"
+    catalogs:
+      - "cwe.xml: CWE 4.20 (2026-04-30), VIEW LIST: CWE-699: Software Development"
+      - "cwec_v4.20.xml: CWE 4.20 (2026-04-30), CWE"
+  sections:
+    - id: "V1.1"
+      title: "Encoding and Sanitization Architecture"
+    - id: "V1.2"
+      title: "Injection Prevention"
+    - id: "V1.3"
+      title: "Sanitization"
+    - id: "V1.4"
+      title: "Memory, String, and Unmanaged Code"
+    - id: "V1.5"
+      title: "Safe Deserialization"
+rules:
+  - id: "ASVS-V1-1.1.1"
+    section: "V1.1"
+    level: 2
+    rule: "Input is decoded or unescaped into a canonical form only once, it is only decoded when encoded data in that form is expected, and that this is done before processing the input further, for example it is not performed after input validation or sanitization."
+    cwe:
+      id: 174
+      name: "Double Decoding of the Same Data"
+      abstraction: "Variant"
+      url: "https://cwe.mitre.org/data/definitions/174.html"
+  - id: "ASVS-V1-1.1.2"
+    section: "V1.1"
+    level: 2
+    rule: "The application performs output encoding and escaping either as a final step before being used by the interpreter for which it is intended or by the interpreter itself."
+    cwe:
+      id: 116
+      name: "Improper Encoding or Escaping of Output"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/116.html"
+      note: "The communications between components can be modified in unexpected ways. Unexpected commands can be executed, bypassing other security mechanisms. Incoming data can be misinterpreted."
+  - id: "ASVS-V1-1.2.1"
+    section: "V1.2"
+    level: 1
+    rule: "Output encoding for an HTTP response, HTML document, or XML document is relevant for the context required, such as encoding the relevant characters for HTML elements, HTML attributes, HTML comments, CSS, or HTTP header fields, to avoid changing the message or document structure."
+    cwe:
+      id: 116
+      name: "Improper Encoding or Escaping of Output"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/116.html"
+      note: "The communications between components can be modified in unexpected ways. Unexpected commands can be executed, bypassing other security mechanisms. Incoming data can be misinterpreted."
+  - id: "ASVS-V1-1.2.2"
+    section: "V1.2"
+    level: 1
+    rule: "When dynamically building URLs, untrusted data is encoded according to its context (e.g., URL encoding or base64url encoding for query or path parameters). Ensure that only safe URL protocols are permitted (e.g., disallow javascript: or data:)."
+    cwe:
+      id: 116
+      name: "Improper Encoding or Escaping of Output"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/116.html"
+      note: "The communications between components can be modified in unexpected ways. Unexpected commands can be executed, bypassing other security mechanisms. Incoming data can be misinterpreted."
+  - id: "ASVS-V1-1.2.3"
+    section: "V1.2"
+    level: 1
+    rule: "Output encoding or escaping is used when dynamically building JavaScript content (including JSON), to avoid changing the message or document structure (to avoid JavaScript and JSON injection)."
+  - id: "ASVS-V1-1.2.4"
+    section: "V1.2"
+    level: 1
+    rule: "Data selection or database queries (e.g., SQL, HQL, NoSQL, Cypher) use parameterized queries, ORMs, entity frameworks, or are otherwise protected from SQL Injection and other database injection attacks. This is also relevant when writing stored procedures."
+    cwe:
+      id: 89
+      name: "Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/89.html"
+      note: "Adversaries could execute system commands, typically by changing the SQL statement to redirect output to a file that can then be executed.\n\nSince SQL databases generally hold sensitive data, loss of confidentiality is a frequent problem with SQL injection vulnerabilities.\n\nIf poor SQL commands are used to check user names and passwords or perform other kinds of authentication, it may be possible to connect to the product as another user with no previous knowledge of the password.\n\nIf authorization information is held in a SQL database, it may be possible to change this information through the successful exploitation of a SQL injection vulnerability.\n\nJust as it may be possible to read sensitive information, it is also possible to modify or even delete this information with a SQL injection attack."
+  - id: "ASVS-V1-1.2.5"
+    section: "V1.2"
+    level: 1
+    rule: "The application protects against OS command injection and that operating system calls use parameterized OS queries or use contextual command line output encoding."
+    cwe:
+      id: 78
+      name: "Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/78.html"
+      note: "Attackers could execute unauthorized operating system commands, which could then be used to disable the product, or read and modify data for which the attacker does not have permissions to access directly. Since the targeted application is directly executing the commands instead of the attacker, any malicious activities may appear to come from the application or the application's owner."
+  - id: "ASVS-V1-1.2.6"
+    section: "V1.2"
+    level: 2
+    rule: "The application protects against LDAP injection vulnerabilities, or that specific security controls to prevent LDAP injection have been implemented."
+    cwe:
+      id: 90
+      name: "Improper Neutralization of Special Elements used in an LDAP Query ('LDAP Injection')"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/90.html"
+      note: "An attacker could include input that changes the LDAP query which allows unintended commands or code to be executed, allows sensitive data to be read or modified or causes other unintended behavior."
+  - id: "ASVS-V1-1.2.7"
+    section: "V1.2"
+    level: 2
+    rule: "The application is protected against XPath injection attacks by using query parameterization or precompiled queries."
+    cwe:
+      id: 643
+      name: "Improper Neutralization of Data within XPath Expressions ('XPath Injection')"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/643.html"
+      note: "Controlling application flow (e.g. bypassing authentication).\n\nThe attacker could read restricted XML content."
+  - id: "ASVS-V1-1.2.8"
+    section: "V1.2"
+    level: 2
+    rule: "LaTeX processors are configured securely (such as not using the \"--shell-escape\" flag) and an allowlist of commands is used to prevent LaTeX injection attacks."
+  - id: "ASVS-V1-1.2.9"
+    section: "V1.2"
+    level: 2
+    rule: "The application escapes special characters in regular expressions (typically using a backslash) to prevent them from being misinterpreted as metacharacters."
+    cwe:
+      id: 624
+      name: "Executable Regular Expression Error"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/624.html"
+  - id: "ASVS-V1-1.2.10"
+    section: "V1.2"
+    level: 3
+    rule: "The application is protected against CSV and Formula Injection. The application must follow the escaping rules defined in RFC 4180 sections 2.6 and 2.7 when exporting CSV content. Additionally, when exporting to CSV or other spreadsheet formats (such as XLS, XLSX, or ODF), special characters (including '=', '+', '-', '@', '\\t' (tab), and '\\0' (null character)) must be escaped with a single quote if they appear as the first character in a field value."
+    cwe:
+      id: 1236
+      name: "Improper Neutralization of Formula Elements in a CSV File"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/1236.html"
+      note: "Attackers can populate data fields which, when saved to a CSV file, may attempt information exfiltration or other malicious activity when automatically executed by the spreadsheet software. Note that current versions of Excel warn users of untrusted content."
+  - id: "ASVS-V1-1.3.1"
+    section: "V1.3"
+    level: 1
+    rule: "All untrusted HTML input from WYSIWYG editors or similar is sanitized using a well-known and secure HTML sanitization library or framework feature."
+    cwe:
+      id: 116
+      name: "Improper Encoding or Escaping of Output"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/116.html"
+      note: "The communications between components can be modified in unexpected ways. Unexpected commands can be executed, bypassing other security mechanisms. Incoming data can be misinterpreted."
+  - id: "ASVS-V1-1.3.2"
+    section: "V1.3"
+    level: 1
+    rule: "The application avoids the use of eval() or other dynamic code execution features such as Spring Expression Language (SpEL). Where there is no alternative, any user input being included must be sanitized before being executed."
+    cwe:
+      id: 95
+      name: "Improper Neutralization of Directives in Dynamically Evaluated Code ('Eval Injection')"
+      abstraction: "Variant"
+      url: "https://cwe.mitre.org/data/definitions/95.html"
+      note: "The injected code could access restricted data / files.\n\nIn some cases, injectable code controls authentication; this may lead to a remote vulnerability.\n\nInjected code can access resources that the attacker is directly prevented from accessing.\n\nCode injection attacks can lead to loss of data integrity in nearly all cases as the control-plane data injected is always incidental to data recall or writing. Additionally, code injection can often result in the execution of arbitrary code or at least modify what code can be executed.\n\nOften the actions performed by injected control code are unlogged."
+  - id: "ASVS-V1-1.3.3"
+    section: "V1.3"
+    level: 2
+    rule: "Data being passed to a potentially dangerous context is sanitized beforehand to enforce safety measures, such as only allowing characters which are safe for this context and trimming input which is too long."
+    cwe:
+      id: 138
+      name: "Improper Neutralization of Special Elements"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/138.html"
+  - id: "ASVS-V1-1.3.4"
+    section: "V1.3"
+    level: 2
+    rule: "User-supplied Scalable Vector Graphics (SVG) scriptable content is validated or sanitized to contain only tags and attributes (such as draw graphics) that are safe for the application, e.g., do not contain scripts and foreignObject."
+    cwe:
+      id: 159
+      name: "Improper Handling of Invalid Use of Special Elements"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/159.html"
+  - id: "ASVS-V1-1.3.5"
+    section: "V1.3"
+    level: 2
+    rule: "The application sanitizes or disables user-supplied scriptable or expression template language content, such as Markdown, CSS or XSL stylesheets, BBCode, or similar."
+    cwe:
+      id: 94
+      name: "Improper Control of Generation of Code ('Code Injection')"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/94.html"
+      note: "In some cases, injectable code controls authentication; this may lead to a remote vulnerability.\n\nInjected code can access resources that the attacker is directly prevented from accessing.\n\nWhen a product allows a user's input to contain code syntax, it might be possible for an attacker to craft the code in such a way that it will alter the intended control flow of the product. As a result, code injection can often result in the execution of arbitrary code. Code injection attacks can also lead to loss of data integrity in nearly all cases, since the control-plane data injected is always incidental to data recall or writing.\n\nOften the actions performed by injected control code are unlogged."
+  - id: "ASVS-V1-1.3.6"
+    section: "V1.3"
+    level: 2
+    rule: "The application protects against Server-side Request Forgery (SSRF) attacks, by validating untrusted data against an allowlist of protocols, domains, paths and ports and sanitizing potentially dangerous characters before using the data to call another service."
+    cwe:
+      id: 918
+      name: "Server-Side Request Forgery (SSRF)"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/918.html"
+      note: "By providing URLs to unexpected hosts or ports, attackers can make it appear that the server is sending the request, possibly bypassing access controls such as firewalls that prevent the attackers from accessing the URLs directly. The server can be used as a proxy to conduct port scanning of hosts in internal networks, use other URLs such as that can access documents on the system (using file://), or use other protocols such as gopher:// or tftp://, which may provide greater control over the contents of requests."
+  - id: "ASVS-V1-1.3.7"
+    section: "V1.3"
+    level: 2
+    rule: "The application protects against template injection attacks by not allowing templates to be built based on untrusted input. Where there is no alternative, any untrusted input being included dynamically during template creation must be sanitized or strictly validated."
+    cwe:
+      id: 94
+      name: "Improper Control of Generation of Code ('Code Injection')"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/94.html"
+      note: "In some cases, injectable code controls authentication; this may lead to a remote vulnerability.\n\nInjected code can access resources that the attacker is directly prevented from accessing.\n\nWhen a product allows a user's input to contain code syntax, it might be possible for an attacker to craft the code in such a way that it will alter the intended control flow of the product. As a result, code injection can often result in the execution of arbitrary code. Code injection attacks can also lead to loss of data integrity in nearly all cases, since the control-plane data injected is always incidental to data recall or writing.\n\nOften the actions performed by injected control code are unlogged."
+  - id: "ASVS-V1-1.3.8"
+    section: "V1.3"
+    level: 2
+    rule: "The application appropriately sanitizes untrusted input before use in Java Naming and Directory Interface (JNDI) queries and that JNDI is configured securely to prevent JNDI injection attacks."
+    cwe:
+      id: 917
+      name: "Improper Neutralization of Special Elements used in an Expression Language Statement ('Expression Language Injection')"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/917.html"
+  - id: "ASVS-V1-1.3.9"
+    section: "V1.3"
+    level: 2
+    rule: "The application sanitizes content before it is sent to memcache to prevent injection attacks."
+  - id: "ASVS-V1-1.3.10"
+    section: "V1.3"
+    level: 2
+    rule: "Format strings which might resolve in an unexpected or malicious way when used are sanitized before being processed."
+    cwe:
+      id: 134
+      name: "Use of Externally-Controlled Format String"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/134.html"
+      note: "Format string problems allow for information disclosure which can severely simplify exploitation of the program.\n\nFormat string problems can result in the execution of arbitrary code, buffer overflows, denial of service, or incorrect data representation."
+  - id: "ASVS-V1-1.3.11"
+    section: "V1.3"
+    level: 2
+    rule: "The application sanitizes user input before passing to mail systems to protect against SMTP or IMAP injection."
+    cwe:
+      id: 147
+      name: "Improper Neutralization of Input Terminators"
+      abstraction: "Variant"
+      url: "https://cwe.mitre.org/data/definitions/147.html"
+  - id: "ASVS-V1-1.3.12"
+    section: "V1.3"
+    level: 3
+    rule: "Regular expressions are free from elements causing exponential backtracking, and ensure untrusted input is sanitized to mitigate ReDoS or Runaway Regex attacks."
+    cwe:
+      id: 1333
+      name: "Inefficient Regular Expression Complexity"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/1333.html"
+      note: "Attackers can create crafted inputs that intentionally cause the regular expression to use excessive backtracking in a way that causes the CPU consumption to spike."
+  - id: "ASVS-V1-1.4.1"
+    section: "V1.4"
+    level: 2
+    rule: "The application uses memory-safe string, safer memory copy and pointer arithmetic to detect or prevent stack, buffer, or heap overflows."
+    cwe:
+      id: 120
+      name: "Buffer Copy without Checking Size of Input ('Classic Buffer Overflow')"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/120.html"
+      note: "Buffer overflows often can be used to execute arbitrary code, which is usually outside the scope of the product's implicit security policy. This can often be used to subvert any other security service.\n\nBuffer overflows generally lead to crashes. Other attacks leading to lack of availability are possible, including putting the product into an infinite loop."
+  - id: "ASVS-V1-1.4.2"
+    section: "V1.4"
+    level: 2
+    rule: "Sign, range, and input validation techniques are used to prevent integer overflows."
+    cwe:
+      id: 190
+      name: "Integer Overflow or Wraparound"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/190.html"
+      note: "This weakness can generally lead to undefined behavior and therefore crashes. When the calculated result is used for resource allocation, this weakness can cause too many (or too few) resources to be allocated, possibly enabling crashes if the product requests more resources than can be provided.\n\nIf the value in question is important to data (as opposed to flow), simple data corruption has occurred. Also, if the overflow/wraparound results in other conditions such as buffer overflows, further memory corruption may occur.\n\nThis weakness can sometimes trigger buffer overflows, which can be used to execute arbitrary code. This is usually outside the scope of the product's implicit security policy.\n\nIf the overflow/wraparound occurs in a loop index variable, this could cause the loop to terminate at the wrong time - too early, too late, or not at all (i.e., infinite loops). With too many iterations, some loops could consume too many resources such as memory, file handles, etc., possibly leading to a crash or other DoS.\n\nIf integer values are used in security-critical decisions, such as calculating quotas or allocation limits, integer overflows can be used to cause an incorrect security decision."
+  - id: "ASVS-V1-1.4.3"
+    section: "V1.4"
+    level: 2
+    rule: "Dynamically allocated memory and resources are released, and that references or pointers to freed memory are removed or set to null to prevent dangling pointers and use-after-free vulnerabilities."
+    cwe:
+      id: 416
+      name: "Use After Free"
+      abstraction: "Variant"
+      url: "https://cwe.mitre.org/data/definitions/416.html"
+      note: "The use of previously freed memory may corrupt valid data, if the memory area in question has been allocated and used properly elsewhere.\n\nIf chunk consolidation occurs after the use of previously freed data, the process may crash when invalid data is used as chunk information.\n\nRead operations on freed memory can sometimes leak sensitive information instead of causing a crash\n\nIf malicious data is entered before chunk consolidation can take place, it may be possible to take advantage of a write-what-where primitive to execute arbitrary code. If the newly allocated data happens to hold a class, in C++ for example, various function pointers may be scattered within the heap data. If one of these function pointers is overwritten with an address to valid shellcode, execution of arbitrary code can be achieved."
+  - id: "ASVS-V1-1.5.1"
+    section: "V1.5"
+    level: 1
+    rule: "The application configures XML parsers to use a restrictive configuration and that unsafe features such as resolving external entities are disabled to prevent XML eXternal Entity (XXE) attacks."
+    cwe:
+      id: 611
+      name: "Improper Restriction of XML External Entity Reference"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/611.html"
+      note: "If the attacker is able to include a crafted DTD and a default entity resolver is enabled, the attacker may be able to access arbitrary files on the system. By submitting an XML file that defines an external entity with a file:// URI, an attacker can cause the processing application to read the contents of a local file. For example, a URI such as \"file:///c:/winnt/win.ini\" designates (in Windows) the file C:\\Winnt\\win.ini, or file:///etc/passwd designates the password file in Unix-based systems. Once the content of the URI is read, it is fed back into the application that is processing the XML. This application may echo back the data (e.g., in an error message), thereby exposing the file contents.\n\nAn attacker may supply a crafted DTD using URIs with schemes such as http://, forcing the application to make outgoing HTTP requests to servers that the attacker cannot reach directly, which can be used to bypass firewall restrictions; hide the source of attacks such as port scanning; or otherwise leverage the server's trust relationship with other entities.\n\nThe product could consume excessive CPU cycles or memory using a URI that points to a large file, or a device that always returns data such as /dev/random. Alternately, the URI could reference a file that contains many nested or recursive entity references to further slow down parsing."
+  - id: "ASVS-V1-1.5.2"
+    section: "V1.5"
+    level: 2
+    rule: "Deserialization of untrusted data enforces safe input handling, such as using an allowlist of object types or restricting client-defined object types, to prevent deserialization attacks. Deserialization mechanisms that are explicitly defined as insecure must not be used with untrusted input."
+    cwe:
+      id: 502
+      name: "Deserialization of Untrusted Data"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/502.html"
+      note: "Attackers can modify unexpected objects or data that was assumed to be safe from modification. Deserialized data or code could be modified without using the provided accessor functions, or unexpected functions could be invoked.\n\nIf a function is making an assumption on when to terminate, based on a sentry in a string, it could easily never terminate.\n\nThe consequences can vary widely, because it depends on which objects or methods are being deserialized, and how they are used. Making an assumption that the code in the deserialized object is valid is dangerous and can enable exploitation. One example is attackers using gadget chains to perform unauthorized actions, such as generating a shell."
+  - id: "ASVS-V1-1.5.3"
+    section: "V1.5"
+    level: 3
+    rule: "Different parsers used in the application for the same data type (e.g., JSON parsers, XML parsers, URL parsers), perform parsing in a consistent way and use the same character encoding mechanism to avoid issues such as JSON Interoperability vulnerabilities or different URI or file parsing behavior being exploited in Remote File Inclusion (RFI) or Server-side Request Forgery (SSRF) attacks."
+    cwe:
+      id: 436
+      name: "Interpretation Conflict"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/436.html"

@@ -1,0 +1,125 @@
+# asvs-v2-rules.yml
+# Verifiable requirements distilled from OWASP ASVS 5.0.0 - V2 Validation and Business Logic.
+meta:
+  prefix: "ASVS"
+  standard: "OWASP ASVS 5.0.0"
+  source: "references/0x11-V2-Validation-and-Business-Logic.md"
+  chapter: "V2"
+  title: "Validation and Business Logic"
+  requirements: 13
+  per_level: {L1: 4, L2: 7, L3: 2}
+  cwe:
+    mapped: 8
+    mapping: "scripts/asvs-5.0.0-cwe-mapping.yml (derived from OWASP ASVS 5.0.be, indicative only)"
+    catalogs:
+      - "cwe.xml: CWE 4.20 (2026-04-30), VIEW LIST: CWE-699: Software Development"
+      - "cwec_v4.20.xml: CWE 4.20 (2026-04-30), CWE"
+  sections:
+    - id: "V2.1"
+      title: "Validation and Business Logic Documentation"
+    - id: "V2.2"
+      title: "Input Validation"
+    - id: "V2.3"
+      title: "Business Logic Security"
+    - id: "V2.4"
+      title: "Anti-automation"
+rules:
+  - id: "ASVS-V2-2.1.1"
+    section: "V2.1"
+    level: 1
+    rule: "The application's documentation defines input validation rules for how to check the validity of data items against an expected structure. This could be common data formats such as credit card numbers, email addresses, telephone numbers, or it could be an internal data format."
+    cwe:
+      id: 20
+      name: "Improper Input Validation"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/20.html"
+      note: "An attacker could provide unexpected values and cause a program crash or arbitrary control of resource allocation, leading to excessive consumption of resources such as memory and CPU.\n\nAn attacker could read confidential data if they are able to control resource references.\n\nAn attacker could use malicious input to modify data or possibly alter control flow in unexpected ways, including arbitrary command execution."
+  - id: "ASVS-V2-2.1.2"
+    section: "V2.1"
+    level: 2
+    rule: "The application's documentation defines how to validate the logical and contextual consistency of combined data items, such as checking that suburb and ZIP code match."
+    cwe:
+      id: 20
+      name: "Improper Input Validation"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/20.html"
+      note: "An attacker could provide unexpected values and cause a program crash or arbitrary control of resource allocation, leading to excessive consumption of resources such as memory and CPU.\n\nAn attacker could read confidential data if they are able to control resource references.\n\nAn attacker could use malicious input to modify data or possibly alter control flow in unexpected ways, including arbitrary command execution."
+  - id: "ASVS-V2-2.1.3"
+    section: "V2.1"
+    level: 2
+    rule: "Expectations for business logic limits and validations are documented, including both per-user and globally across the application."
+  - id: "ASVS-V2-2.2.1"
+    section: "V2.2"
+    level: 1
+    rule: "Input is validated to enforce business or functional expectations for that input. This should either use positive validation against an allow list of values, patterns, and ranges, or be based on comparing the input to an expected structure and logical limits according to predefined rules. For L1, this can focus on input which is used to make specific business or security decisions. For L2 and up, this should apply to all input."
+    cwe:
+      id: 20
+      name: "Improper Input Validation"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/20.html"
+      note: "An attacker could provide unexpected values and cause a program crash or arbitrary control of resource allocation, leading to excessive consumption of resources such as memory and CPU.\n\nAn attacker could read confidential data if they are able to control resource references.\n\nAn attacker could use malicious input to modify data or possibly alter control flow in unexpected ways, including arbitrary command execution."
+  - id: "ASVS-V2-2.2.2"
+    section: "V2.2"
+    level: 1
+    rule: "The application is designed to enforce input validation at a trusted service layer. While client-side validation improves usability and should be encouraged, it must not be relied upon as a security control."
+    cwe:
+      id: 602
+      name: "Client-Side Enforcement of Server-Side Security"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/602.html"
+      note: "Client-side validation checks can be easily bypassed, allowing malformed or unexpected input to pass into the application, potentially as trusted data. This may lead to unexpected states, behaviors and possibly a resulting crash.\n\nClient-side checks for authentication can be easily bypassed, allowing clients to escalate their access levels and perform unintended actions."
+  - id: "ASVS-V2-2.2.3"
+    section: "V2.2"
+    level: 2
+    rule: "The application ensures that combinations of related data items are reasonable according to the pre-defined rules."
+    cwe:
+      id: 20
+      name: "Improper Input Validation"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/20.html"
+      note: "An attacker could provide unexpected values and cause a program crash or arbitrary control of resource allocation, leading to excessive consumption of resources such as memory and CPU.\n\nAn attacker could read confidential data if they are able to control resource references.\n\nAn attacker could use malicious input to modify data or possibly alter control flow in unexpected ways, including arbitrary command execution."
+  - id: "ASVS-V2-2.3.1"
+    section: "V2.3"
+    level: 1
+    rule: "The application will only process business logic flows for the same user in the expected sequential step order and without skipping steps."
+    cwe:
+      id: 841
+      name: "Improper Enforcement of Behavioral Workflow"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/841.html"
+      note: "An attacker could cause the product to skip critical steps or perform them in the wrong order, bypassing its intended business logic. This can sometimes have security implications."
+  - id: "ASVS-V2-2.3.2"
+    section: "V2.3"
+    level: 2
+    rule: "Business logic limits are implemented per the application's documentation to avoid business logic flaws being exploited."
+  - id: "ASVS-V2-2.3.3"
+    section: "V2.3"
+    level: 2
+    rule: "Transactions are being used at the business logic level such that either a business logic operation succeeds in its entirety or it is rolled back to the previous correct state."
+  - id: "ASVS-V2-2.3.4"
+    section: "V2.3"
+    level: 2
+    rule: "Business logic level locking mechanisms are used to ensure that limited quantity resources (such as theater seats or delivery slots) cannot be double-booked by manipulating the application's logic."
+  - id: "ASVS-V2-2.3.5"
+    section: "V2.3"
+    level: 3
+    rule: "High-value business logic flows require multi-user approval to prevent unauthorized or accidental actions. This could include but is not limited to large monetary transfers, contract approvals, access to classified information, or safety overrides in manufacturing."
+  - id: "ASVS-V2-2.4.1"
+    section: "V2.4"
+    level: 2
+    rule: "Anti-automation controls are in place to protect against excessive calls to application functions that could lead to data exfiltration, garbage-data creation, quota exhaustion, rate-limit breaches, denial-of-service, or overuse of costly resources."
+    cwe:
+      id: 770
+      name: "Allocation of Resources Without Limits or Throttling"
+      abstraction: "Base"
+      url: "https://cwe.mitre.org/data/definitions/770.html"
+      note: "When allocating resources without limits, an attacker could prevent other systems, applications, or processes from accessing the same type of resource. It can be easy for an attacker to consume many resources by rapidly making many requests or causing larger resources to be used than is needed."
+  - id: "ASVS-V2-2.4.2"
+    section: "V2.4"
+    level: 3
+    rule: "Business logic flows require realistic human timing, preventing excessively rapid transaction submissions."
+    cwe:
+      id: 799
+      name: "Improper Control of Interaction Frequency"
+      abstraction: "Class"
+      url: "https://cwe.mitre.org/data/definitions/799.html"

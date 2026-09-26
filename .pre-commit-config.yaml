@@ -1,0 +1,28 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+
+  - repo: local
+    hooks:
+      - id: skill-format
+        name: SKILL.md follows the Agent Skills format
+        entry: python3 scripts/check-skill.py
+        language: system
+        files: ^skills/
+        pass_filenames: false
+      - id: asvs-rules
+        name: ASVS rules consistent with references
+        entry: scripts/asvs.sh verify
+        language: system
+        files: ^(skills/asvs/(rules|references)/|scripts/asvs\.sh$)
+        pass_filenames: false

@@ -1,0 +1,6 @@
+.DS_Store
+__pycache__/
+*.pyc
+# CWE catalogs are large downloads, see scripts/enrich-rules-with-cwe.py
+scripts/cwe.xml
+scripts/cwec_*.xml
