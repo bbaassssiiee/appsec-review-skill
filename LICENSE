@@ -1,12 +1,12 @@
 The contents of this repository are licensed under the Creative Commons
 Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0).
 
-The files in skills/asvs/references/ and skills/asvs/rules/ are derived from
+The files in skills/appsec-review/references/ and skills/appsec-review/rules/ are derived from
 the OWASP Application Security Verification Standard 5.0.0,
 Copyright (c) 2008-2025 The OWASP Foundation, licensed under CC BY-SA 4.0.
 https://github.com/OWASP/ASVS
 
-The CWE names and descriptions in skills/asvs/rules/ are taken from the
+The CWE names and descriptions in skills/appsec-review/rules/ are taken from the
 MITRE CWE list, Copyright (c) The MITRE Corporation.
 https://cwe.mitre.org/about/termsofuse.html
 

@@ -3,7 +3,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SKILL_DIR="${SKILL_DIR:-$(dirname "$SCRIPT_DIR")/skills/asvs}"
+SKILL_DIR="${SKILL_DIR:-$(dirname "$SCRIPT_DIR")/skills/appsec-review}"
 REF_DIR="${SKILL_DIR}/references"
 OUT_DIR="${SKILL_DIR}/rules"
 

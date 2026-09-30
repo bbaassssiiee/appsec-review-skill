@@ -24,5 +24,5 @@ repos:
         name: ASVS rules consistent with references
         entry: scripts/asvs.sh verify
         language: system
-        files: ^(skills/asvs/(rules|references)/|scripts/asvs\.sh$)
+        files: ^(skills/appsec-review/(rules|references)/|scripts/asvs\.sh$)
         pass_filenames: false

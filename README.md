@@ -1,4 +1,4 @@
-# asvs-skill
+# appsec-review-skill
 
 An [Agent Skill](https://agentskills.io) for checking applications against the
 [OWASP Application Security Verification Standard (ASVS) 5.0.0](https://owasp.org/www-project-application-security-verification-standard/).
@@ -14,23 +14,23 @@ GitHub Copilot, OpenCode and other agents that support Agent Skills.
 
 ## Install
 
-The skill is the folder [`skills/asvs/`](skills/asvs/). To install it, copy that folder
+The skill is the folder [`skills/appsec-review/`](skills/appsec-review/). To install it, copy that folder
 into your agent's skills directory.
 
 ```sh
-git clone https://github.com/bbaassssiiee/asvs-skill.git
+git clone https://github.com/bbaassssiiee/appsec-review-skill.git
 ```
 
 | Agent | Project (commit it with your repo) | User (all projects) |
 |---|---|---|
-| Claude Code | `.claude/skills/asvs/` | `~/.claude/skills/asvs/` |
-| GitHub Copilot | `.github/skills/asvs/` | `~/.copilot/skills/asvs/` |
-| OpenCode | `.opencode/skills/asvs/` | `~/.config/opencode/skills/asvs/` |
+| Claude Code | `.claude/skills/appsec-review/` | `~/.claude/skills/appsec-review/` |
+| GitHub Copilot | `.github/skills/appsec-review/` | `~/.copilot/skills/appsec-review/` |
+| OpenCode | `.opencode/skills/appsec-review/` | `~/.config/opencode/skills/appsec-review/` |
 
 For example, to install for your user account:
 
 ```sh
-cp -r asvs-skill/skills/asvs ~/.claude/skills/asvs
+cp -r appsec-review-skill/skills/appsec-review ~/.claude/skills/appsec-review
 ```
 
 Copilot and OpenCode also read `.claude/skills/`, so a single copy there works for
@@ -41,8 +41,8 @@ all three agents.
 This repository is also a Claude Code plugin marketplace:
 
 ```text
-/plugin marketplace add bbaassssiiee/asvs-skill
-/plugin install asvs@asvs-skill
+/plugin marketplace add bbaassssiiee/appsec-review-skill
+/plugin install appsec-review@appsec-review-skill
 ```
 
 ## Usage
@@ -60,7 +60,7 @@ If you don't give a level, the skill checks at L2 and says so in the report.
 ## Layout
 
 ```text
-skills/asvs/            the skill (this is what gets installed)
+skills/appsec-review/   the skill (this is what gets installed)
   SKILL.md              instructions: routing, procedure, report format
   rules/                asvs-v<N>-rules.yml, one per chapter
   references/           ASVS 5.0.0 chapters and appendices (Markdown)
