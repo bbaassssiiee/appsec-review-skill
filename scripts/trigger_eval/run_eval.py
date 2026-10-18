@@ -121,8 +121,18 @@ def run_query(
     timeout: int,
     project_root: str | None,
     model: str | None = None,
+    user_settings: bool = False,
 ) -> dict:
-    """Run a single query and return {"triggered", "outcome", "elapsed"}.
+    """Run a single query and return {"triggered", "outcome", "tool", "elapsed"}.
+
+    "tool" names the tool that won when the outcome is other-tool (for a
+    Skill call, the skill it invoked), so a miss can be told apart from a
+    competing skill or from the model exploring the workspace first.
+
+    By default claude -p runs with only project-level settings and no MCP
+    servers, so the user's installed plugins and connectors do not compete
+    with the skill under test. Pass user_settings=True to measure
+    triggering in this machine's real environment instead.
 
     Registers the skill as a command file, runs `claude -p` with the raw
     query and watches the stream for the first tool call. By default the
@@ -137,12 +147,23 @@ def run_query(
     """
     start_time = time.time()
 
-    def outcome(name: str) -> dict:
+    def outcome(name: str, tool: str | None = None) -> dict:
         return {
             "triggered": name == OUTCOME_SKILL,
             "outcome": name,
+            "tool": tool,
             "elapsed": round(time.time() - start_time, 1),
         }
+
+    def describe_tool(tool_name: str, tool_input: dict | str) -> str:
+        """`Skill(engineering:code-review)` or `Read(path)` for a competing call."""
+        if isinstance(tool_input, str):
+            try:
+                tool_input = json.loads(tool_input)
+            except json.JSONDecodeError:
+                tool_input = {}
+        target = tool_input.get("skill") or tool_input.get("file_path") if isinstance(tool_input, dict) else None
+        return f"{tool_name}({target})" if target else tool_name
 
     if STOP.is_set():
         return outcome(OUTCOME_INTERRUPTED)
@@ -172,6 +193,9 @@ def run_query(
         ]
         if model:
             cmd.extend(["--model", model])
+        if not user_settings:
+            sources = "project,local" if project_root is not None else "project"
+            cmd.extend(["--setting-sources", sources, "--strict-mcp-config"])
 
         # Remove CLAUDECODE env var to allow nesting claude -p inside a
         # Claude Code session. The guard is for interactive terminal conflicts;
@@ -238,7 +262,7 @@ def run_query(
                                     pending_tool_name = tool_name
                                     accumulated_json = ""
                                 else:
-                                    return outcome(OUTCOME_OTHER_TOOL)
+                                    return outcome(OUTCOME_OTHER_TOOL, tool_name)
 
                         elif se_type == "content_block_delta" and pending_tool_name:
                             delta = se.get("delta", {})
@@ -251,7 +275,7 @@ def run_query(
                             if pending_tool_name:
                                 if clean_name in accumulated_json:
                                     return outcome(OUTCOME_SKILL)
-                                return outcome(OUTCOME_OTHER_TOOL)
+                                return outcome(OUTCOME_OTHER_TOOL, describe_tool(pending_tool_name, accumulated_json))
                             if se_type == "message_stop":
                                 return outcome(OUTCOME_NO_TOOL)
 
@@ -270,7 +294,7 @@ def run_query(
                                 return outcome(OUTCOME_SKILL)
                             if tool_name == "Read" and clean_name in tool_input.get("file_path", ""):
                                 return outcome(OUTCOME_SKILL)
-                            return outcome(OUTCOME_OTHER_TOOL)
+                            return outcome(OUTCOME_OTHER_TOOL, describe_tool(tool_name, tool_input))
 
                     elif event.get("type") == "result":
                         return outcome(OUTCOME_NO_TOOL)
@@ -296,9 +320,10 @@ def run_single_query(
     timeout: int,
     project_root: str | None,
     model: str | None = None,
+    user_settings: bool = False,
 ) -> bool:
     """Run a single query and return whether the skill was triggered."""
-    return run_query(query, skill_name, skill_description, timeout, project_root, model)["triggered"]
+    return run_query(query, skill_name, skill_description, timeout, project_root, model, user_settings)["triggered"]
 
 
 def run_eval(
@@ -312,6 +337,7 @@ def run_eval(
     trigger_threshold: float = 0.5,
     model: str | None = None,
     verbose: bool = False,
+    user_settings: bool = False,
 ) -> dict:
     """Run the full eval set and return results.
 
@@ -326,10 +352,12 @@ def run_eval(
     total_runs = len(eval_set) * runs_per_query
     query_triggers: dict[str, list[bool]] = {}
     query_outcomes: dict[str, dict[str, int]] = {}
+    query_tools: dict[str, dict[str, int]] = {}
     query_items: dict[str, dict] = {}
     for item in eval_set:
         query_triggers[item["query"]] = []
         query_outcomes[item["query"]] = {}
+        query_tools[item["query"]] = {}
         query_items[item["query"]] = item
 
     STOP.clear()
@@ -348,6 +376,7 @@ def run_eval(
                     timeout,
                     None if project_root is None else str(project_root),
                     model,
+                    user_settings,
                 )
                 future_to_item[future] = item
 
@@ -360,14 +389,17 @@ def run_eval(
                 run = future.result()
             except Exception as e:
                 print(f"Warning: query failed: {e}", file=sys.stderr)
-                run = {"triggered": False, "outcome": "error", "elapsed": 0.0}
+                run = {"triggered": False, "outcome": "error", "tool": None, "elapsed": 0.0}
             query_triggers[query].append(run["triggered"])
             query_outcomes[query][run["outcome"]] = query_outcomes[query].get(run["outcome"], 0) + 1
+            if run.get("tool"):
+                query_tools[query][run["tool"]] = query_tools[query].get(run["tool"], 0) + 1
             if verbose:
                 mark = "TRIGGERED" if run["triggered"] else "-"
+                tool = f"  -> {run['tool']}" if run.get("tool") else ""
                 print(
                     f"  [{done}/{total_runs}] {mark:9} {run['outcome']:10} "
-                    f"{run['elapsed']:5.1f}s  {query[:60]}",
+                    f"{run['elapsed']:5.1f}s  {query[:60]}{tool}",
                     file=sys.stderr,
                 )
     except KeyboardInterrupt:
@@ -397,6 +429,7 @@ def run_eval(
             "runs": len(triggers),
             "pass": did_pass,
             "outcomes": query_outcomes[query],
+            "other_tools": query_tools[query],
         })
 
     passed = sum(1 for r in results if r["pass"])
@@ -430,6 +463,11 @@ def main():
         "--in-project", action="store_true",
         help="Run claude -p inside the enclosing project (the one with .claude/) instead of a "
              "throwaway directory, so the model also sees the project's files",
+    )
+    parser.add_argument(
+        "--user-settings", action="store_true",
+        help="Let claude -p load your user-level settings, plugins and MCP servers, so installed "
+             "skills and connectors compete with the one under test (default: project settings only)",
     )
     parser.add_argument("--verbose", action="store_true", help="Print progress to stderr")
     args = parser.parse_args()
@@ -466,6 +504,7 @@ def main():
             trigger_threshold=args.trigger_threshold,
             model=args.model,
             verbose=args.verbose,
+            user_settings=args.user_settings,
         )
     except KeyboardInterrupt:
         sys.exit(130)
@@ -483,6 +522,9 @@ def main():
             status = "PASS" if r["pass"] else "FAIL"
             rate_str = f"{r['triggers']}/{r['runs']}"
             print(f"  [{status}] rate={rate_str} expected={r['should_trigger']}: {r['query'][:70]}", file=sys.stderr)
+            if not r["pass"] and r["other_tools"]:
+                lost_to = ", ".join(f"{t} x{n}" for t, n in sorted(r["other_tools"].items(), key=lambda kv: -kv[1]))
+                print(f"         first call went to: {lost_to}", file=sys.stderr)
 
     print(json.dumps(output, indent=2))
 

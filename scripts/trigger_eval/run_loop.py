@@ -58,6 +58,7 @@ def run_loop(
     verbose: bool,
     live_report_path: Path | None = None,
     log_dir: Path | None = None,
+    user_settings: bool = False,
     in_project: bool = False,
 ) -> dict:
     """Run the eval + improvement loop."""
@@ -98,6 +99,7 @@ def run_loop(
             trigger_threshold=trigger_threshold,
             model=model,
             verbose=verbose,
+            user_settings=user_settings,
         )
         eval_elapsed = time.time() - t0
 
@@ -260,6 +262,11 @@ def main():
         help="Run claude -p inside the enclosing project (the one with .claude/) instead of a "
              "throwaway directory, so the model also sees the project's files",
     )
+    parser.add_argument(
+        "--user-settings", action="store_true",
+        help="Let claude -p load your user-level settings, plugins and MCP servers, so installed "
+             "skills and connectors compete with the one under test (default: project settings only)",
+    )
     parser.add_argument("--verbose", action="store_true", help="Print progress to stderr")
     parser.add_argument("--report", default="auto", help="Generate HTML report at this path (default: 'auto' for temp file, 'none' to disable)")
     parser.add_argument("--results-dir", default=None, help="Save all outputs (results.json, report.html, log.txt) to a timestamped subdirectory here")
@@ -313,6 +320,7 @@ def main():
             live_report_path=live_report_path,
             log_dir=log_dir,
             in_project=args.in_project,
+            user_settings=args.user_settings,
         )
     except KeyboardInterrupt:
         print("Interrupted", file=sys.stderr)

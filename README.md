@@ -172,9 +172,12 @@ your configured Claude Code model unless you pass `--model` to `run_eval`. Each 
 in its own throwaway directory that holds only the skill's command file, so the model sees
 the skill the way an end user would and not this repository's source; pass `--in-project`
 to run inside the repository instead (that writes temporary command files under
-`.claude/commands/`, which is git-ignored, as is `evals/results/`). With `--verbose` every
-finished run prints one line (triggered or not, what the first tool call was, seconds
-taken). Each query costs a `claude -p` call of 10 to 25 seconds, so a full run with the
+`.claude/commands/`, which is git-ignored, as is `evals/results/`). The `claude -p` calls
+load project-level settings only and no MCP servers, so the skills and connectors installed
+on your machine do not compete with the description under test; pass `--user-settings` to
+measure triggering in your real environment instead. With `--verbose` every finished run
+prints one line (triggered or not, what the first tool call was, seconds taken), and a
+failed query lists which tool or skill the first call went to instead. Each query costs a `claude -p` call of 10 to 25 seconds, so a full run with the
 default 3 runs per query is about 70 calls per iteration; Ctrl-C stops the run and kills
 the `claude` subprocesses within a second.
 
