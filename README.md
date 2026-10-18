@@ -168,10 +168,15 @@ python3 -m scripts.trigger_eval.run_eval \
 ```
 
 `--model` is the model used to propose new descriptions; the triggering test itself uses
-your configured Claude Code model unless you pass `--model` to `run_eval`. The loop
-writes temporary command files under `.claude/commands/` while it runs and its outputs
-under `evals/results/`; both are git-ignored. Each query costs a `claude -p` call, so a
-full run with the default 3 runs per query is about 70 calls per iteration.
+your configured Claude Code model unless you pass `--model` to `run_eval`. Each query runs
+in its own throwaway directory that holds only the skill's command file, so the model sees
+the skill the way an end user would and not this repository's source; pass `--in-project`
+to run inside the repository instead (that writes temporary command files under
+`.claude/commands/`, which is git-ignored, as is `evals/results/`). With `--verbose` every
+finished run prints one line (triggered or not, what the first tool call was, seconds
+taken). Each query costs a `claude -p` call of 10 to 25 seconds, so a full run with the
+default 3 runs per query is about 70 calls per iteration; Ctrl-C stops the run and kills
+the `claude` subprocesses within a second.
 
 When it finishes, paste `best_description` from the JSON output into `SKILL.md` and run
 `pytest` so the trigger words stay covered.

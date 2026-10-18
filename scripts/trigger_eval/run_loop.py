@@ -58,9 +58,10 @@ def run_loop(
     verbose: bool,
     live_report_path: Path | None = None,
     log_dir: Path | None = None,
+    in_project: bool = False,
 ) -> dict:
     """Run the eval + improvement loop."""
-    project_root = find_project_root()
+    project_root = find_project_root() if in_project else None
     name, original_description, content = parse_skill_md(skill_path)
     current_description = description_override or original_description
 
@@ -96,6 +97,7 @@ def run_loop(
             runs_per_query=runs_per_query,
             trigger_threshold=trigger_threshold,
             model=model,
+            verbose=verbose,
         )
         eval_elapsed = time.time() - t0
 
@@ -247,12 +249,17 @@ def main():
     parser.add_argument("--skill-path", required=True, help="Path to skill directory")
     parser.add_argument("--description", default=None, help="Override starting description")
     parser.add_argument("--num-workers", type=int, default=10, help="Number of parallel workers")
-    parser.add_argument("--timeout", type=int, default=30, help="Timeout per query in seconds")
+    parser.add_argument("--timeout", type=int, default=60, help="Timeout per query in seconds")
     parser.add_argument("--max-iterations", type=int, default=5, help="Max improvement iterations")
     parser.add_argument("--runs-per-query", type=int, default=3, help="Number of runs per query")
     parser.add_argument("--trigger-threshold", type=float, default=0.5, help="Trigger rate threshold")
     parser.add_argument("--holdout", type=float, default=0.4, help="Fraction of eval set to hold out for testing (0 to disable)")
     parser.add_argument("--model", required=True, help="Model for improvement")
+    parser.add_argument(
+        "--in-project", action="store_true",
+        help="Run claude -p inside the enclosing project (the one with .claude/) instead of a "
+             "throwaway directory, so the model also sees the project's files",
+    )
     parser.add_argument("--verbose", action="store_true", help="Print progress to stderr")
     parser.add_argument("--report", default="auto", help="Generate HTML report at this path (default: 'auto' for temp file, 'none' to disable)")
     parser.add_argument("--results-dir", default=None, help="Save all outputs (results.json, report.html, log.txt) to a timestamped subdirectory here")
@@ -290,21 +297,26 @@ def main():
 
     log_dir = results_dir / "logs" if results_dir else None
 
-    output = run_loop(
-        eval_set=eval_set,
-        skill_path=skill_path,
-        description_override=args.description,
-        num_workers=args.num_workers,
-        timeout=args.timeout,
-        max_iterations=args.max_iterations,
-        runs_per_query=args.runs_per_query,
-        trigger_threshold=args.trigger_threshold,
-        holdout=args.holdout,
-        model=args.model,
-        verbose=args.verbose,
-        live_report_path=live_report_path,
-        log_dir=log_dir,
-    )
+    try:
+        output = run_loop(
+            eval_set=eval_set,
+            skill_path=skill_path,
+            description_override=args.description,
+            num_workers=args.num_workers,
+            timeout=args.timeout,
+            max_iterations=args.max_iterations,
+            runs_per_query=args.runs_per_query,
+            trigger_threshold=args.trigger_threshold,
+            holdout=args.holdout,
+            model=args.model,
+            verbose=args.verbose,
+            live_report_path=live_report_path,
+            log_dir=log_dir,
+            in_project=args.in_project,
+        )
+    except KeyboardInterrupt:
+        print("Interrupted", file=sys.stderr)
+        sys.exit(130)
 
     # Save JSON output
     json_output = json.dumps(output, indent=2)
