@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Render an ASVS verification report from a findings file.
 
-The agent records only what it decided (id, status, evidence, remediation);
-this script adds the level, CWE link and rule text from the rules files,
-checks that every id exists and every status is valid, and computes the
-summary counts, so the numbers in the report are never typed by hand.
+The agent records only what it decided (id, status, evidence, why,
+remediation); this script adds the level, rule text, CWE link, name and
+typical consequence from the rules files, checks that every id exists and
+every status is valid, and computes the summary counts, so the numbers in
+the report are never typed by hand. PASS rows stay one table line; every
+FAIL and PARTIAL gets a Findings entry that explains the requirement, what
+was found, why it matters and how to fix it.
 
 Usage:
     asvs-report.py findings.json                 # Markdown report on stdout
@@ -24,6 +27,7 @@ Findings file (JSON; see ../assets/report-schema.json):
       "findings": [
         {"id": "6.2.1", "status": "FAIL",
          "evidence": "`auth/password.py:42` minimum length is 6",
+         "why": "Six-character passwords fall to online guessing within the lockout budget, and offline cracking of the stored hashes is trivial.",
          "remediation": "Raise the minimum to 8 (15 recommended) in the validator and the signup form."},
         {"id": "7.2.1", "status": "PASS", "evidence": "`session.ts:18` tokens validated server side"}
       ],
@@ -128,6 +132,9 @@ def expand(doc, rules, norm_id, std_id):
             "rule": r["rule"],
             "cwe": f"CWE-{r['cwe']['id']}" if r.get("cwe") and r["cwe"].get("id") else "",
             "cwe_link": cwe_link(r),
+            "cwe_name": (r.get("cwe") or {}).get("name", ""),
+            "cwe_note": (r.get("cwe") or {}).get("note", ""),
+            "why": f.get("why", ""),
         })
     out.sort(key=lambda x: [int(p) for p in x["id"].split("-", 1)[1].split(".")])
     return out
@@ -162,11 +169,23 @@ def render_markdown(doc, expanded):
     risks = doc.get("top_risks") or []
     if risks:
         lines += ["", "Top risks"] + [f"{i}. {r}" for i, r in enumerate(risks, 1)]
-    fixes = [f for f in expanded if f["status"] in ("FAIL", "PARTIAL")]
+    fixes = sorted((f for f in expanded if f["status"] in ("FAIL", "PARTIAL")),
+                   key=lambda f: (f["level"], [int(p) for p in f["id"].split("-", 1)[1].split(".")]))
     if fixes:
-        lines += ["", "Remediation"]
+        lines += ["", "Findings"]
         for f in fixes:
-            lines.append(f"- {f['id']} ({f['status']}): {f['remediation']}")
+            lines += ["", f"### {f['id']} {f['status']} (L{f['level']})",
+                      f"Requirement: {f['rule']}",
+                      f"Found: {f['evidence']}"]
+            why = f["why"]
+            if f["cwe"]:
+                weakness = f"{f['cwe_link']} {f['cwe_name']}".strip()
+                if f["cwe_note"]:
+                    weakness += f": {f['cwe_note']}"
+                lines.append(f"Why it matters: {weakness}" + (f" {why}" if why else ""))
+            elif why:
+                lines.append(f"Why it matters: {why}")
+            lines.append(f"Fix: {f['remediation']}")
     missing = doc.get("missing_evidence") or []
     if missing:
         lines += ["", "Missing evidence"] + [f"- {m}" for m in missing]

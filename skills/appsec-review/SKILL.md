@@ -1,6 +1,6 @@
 ---
 name: appsec-review
-description: Verify code, designs, pull requests and configuration against the OWASP Application Security Verification Standard (ASVS) 5.0.0 at Level 1, 2, or 3. Use whenever the user mentions ASVS, OWASP, appsec or application security, asks whether a login, session, upload, API, token or other feature is secure enough, asks which security requirements apply to a feature, component, design document or SDLC phase (plan, code, test, build, deploy, operate), or wants a security review of code or a diff before merging. Also use for "what does ASVS/OWASP say about X" questions. Routes to the relevant ASVS chapters (V1-V17), loads only the applicable sections, checks each requirement against evidence, and reports PASS/FAIL with remediation and CWE references.
+description: Verify code, designs, pull requests and configuration against the OWASP Application Security Verification Standard (ASVS) 5.0.0 at Level 1, 2, or 3. Use whenever the user mentions ASVS, OWASP, CWE, appsec or application security, asks whether a login, session, upload, API, token or other feature is secure enough, asks which security requirements apply to a feature, component, design document or SDLC phase (plan, code, test, build, deploy, operate), or wants a security review of code or a diff before merging. Also use for "what does ASVS/OWASP say about X" questions. Routes to the relevant ASVS chapters (V1-V17), loads only the applicable sections, checks each requirement against evidence, and reports PASS/FAIL, explaining each failure with its CWE weakness, why it matters and how to fix it.
 license: CC-BY-SA-4.0
 ---
 
@@ -198,7 +198,10 @@ The *Documentation* sections (V1.1, V2.1, V3.1, V5.1, V6.1, V7.1, V8.1, V11.1, V
    - `PARTIAL`: met in some places but not all.
    - `N/A`: the feature doesn't exist in scope. Give the reason.
    - `UNVERIFIED`: can't be decided from the available material. Say what evidence is missing.
-8. **Remediate**: for every `FAIL` and `PARTIAL`, say what to change and where, in one or two sentences. Name the file or config key and the concrete target (a value, a library call, a header), not a restatement of the requirement. If the fix is a design decision rather than a code change, say who has to make it.
+8. **Explain and remediate** every `FAIL` and `PARTIAL`. This is where the review earns its keep, so spend the words here and not on passes:
+   - *Why it matters*: what an attacker gains from this gap in this application, in one or two sentences. The CWE mapped to the rule gives the weakness class and its typical consequence; add the application-specific part (which data, which users, which entry point). Readers learn security from this line; make it concrete rather than generic.
+   - *Fix*: what to change and where. Name the file or config key and the concrete target (a value, a library call, a header), not a restatement of the requirement. If the fix is a design decision rather than a code change, say who has to make it.
+   A `PASS` gets its one line of evidence in the table and nothing more.
 9. **Report** as below.
 
 Don't mark a rule `PASS` without evidence. Leaving a rule `UNVERIFIED` is better than guessing.
@@ -219,8 +222,8 @@ For "which requirements apply to X?" or "what does ASVS say about Y?", skip inve
 
 Produce the report in two steps rather than typing the table by hand:
 
-1. Write your decisions to a findings file, one entry per rule (`id`, `status`, `evidence`, `remediation`), plus scope, level, inventory, chapters, skipped chapters, sections marked N/A, top risks and missing evidence. The format is `assets/report-schema.json`; `scripts/asvs-report.py --example` prints a filled-in example.
-2. Run `scripts/asvs-report.py findings.json -o asvs-report.md`. It rejects unknown ids, invalid statuses, failures without remediation and rules above the target level, then adds the level, rule text and CWE link from the rules files and computes the summary counts.
+1. Write your decisions to a findings file, one entry per rule (`id`, `status`, `evidence`, and for failures `why` and `remediation`), plus scope, level, inventory, chapters, skipped chapters, sections marked N/A, top risks and missing evidence. The format is `assets/report-schema.json`; `scripts/asvs-report.py --example` prints a filled-in example.
+2. Run `scripts/asvs-report.py findings.json -o asvs-report.md`. It rejects unknown ids, invalid statuses, failures without remediation and rules above the target level, then adds the level, rule text, CWE link, name and typical consequence from the rules files, computes the summary counts, and writes a Findings entry for every `FAIL` and `PARTIAL`.
 
 Show the rendered report to the user and keep the findings file next to it; `--format json` gives a normalised JSON version for tooling or CI. When the script can't run, write the same report by hand in the format below.
 
@@ -240,12 +243,19 @@ Summary: <n> PASS, <n> FAIL, <n> PARTIAL, <n> N/A, <n> UNVERIFIED
 Top risks
 1. ...
 
-Remediation
-- v5.0.0-6.2.1 (FAIL): raise the minimum in `auth/password.py:42` to 8 (15 recommended) and mirror it in the signup form validation.
+Findings
+
+### v5.0.0-6.2.1 FAIL (L1)
+Requirement: User set passwords are at least 8 characters in length although a minimum of 15 characters is strongly recommended.
+Found: `auth/password.py:42` minimum length is 6
+Why it matters: [CWE-521](https://cwe.mitre.org/data/definitions/521.html) Weak Password Requirements: An attacker could easily guess user passwords and gain access user accounts. Six-character passwords fall to online guessing within the lockout budget, and the stored hashes crack offline in minutes.
+Fix: raise the minimum in `auth/password.py:42` to 8 (15 recommended) and mirror it in the signup form validation.
 
 Missing evidence
 - ...
 ```
+
+The table is the overview; a `PASS` lives only there, with its evidence. The Findings block is the substance: one entry per `FAIL` and `PARTIAL` with the requirement, what was found, why it matters and the fix. Order the entries by level and then by id, so the L1 failures come first.
 
 In the CWE column, write each CWE as a Markdown link to its MITRE page: `CWE-<ID>` links to `https://cwe.mitre.org/data/definitions/<ID>.html`, where `<ID>` is the number only (so `CWE-78` becomes `[CWE-78](https://cwe.mitre.org/data/definitions/78.html)`). Separate multiple CWEs with a comma, and leave the cell empty when there is no mapping.
 

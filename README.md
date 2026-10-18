@@ -81,7 +81,10 @@ skills/appsec-review/scripts/asvs-report.py findings.json -o asvs-report.md
 skills/appsec-review/scripts/asvs-report.py findings.json --format json # for CI or tooling
 ```
 
-Every `FAIL` and `PARTIAL` carries a remediation. For a design document there is no
+A `PASS` is one table row with its evidence. Every `FAIL` and `PARTIAL` gets a Findings
+entry: the requirement, what was found, why it matters (the mapped CWE weakness and its
+typical consequence, plus what it means for this application) and the fix. The CWE
+mapping is there to teach, not just to tag. For a design document there is no
 code to cite; the agent then works from `assets/design-review-checklist.md`, which maps
 the documentation and design requirements to questions.
 

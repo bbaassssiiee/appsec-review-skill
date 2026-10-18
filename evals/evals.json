@@ -26,7 +26,7 @@
         {"text": "Design checklist was used", "check": "transcript reads assets/design-review-checklist.md"},
         {"text": "Open design questions are UNVERIFIED, not FAIL", "check": "14.1.1 and 16.1.1 are UNVERIFIED (or missing evidence lists them); neither is FAIL"},
         {"text": "Session lifetime gap is found", "check": "7.1.1 is PARTIAL or UNVERIFIED and the finding mentions the absolute lifetime"},
-        {"text": "Every FAIL/PARTIAL has a remediation", "check": "report contains a Remediation block with one line per FAIL/PARTIAL"},
+        {"text": "Every FAIL/PARTIAL has a remediation", "check": "report contains a Findings block with Requirement/Found/Why it matters/Fix per FAIL/PARTIAL and nothing beyond the table row for a PASS"},
         {"text": "Report is rendered from a findings file", "check": "transcript shows asvs-report.py run on a findings JSON, or an explicit note that the script could not run"}
       ]
     },
@@ -57,7 +57,7 @@
         {"text": "Scope is the diff", "check": "report scope names the branch/PR and states that unchanged code is out of scope"},
         {"text": "Recovery section is covered", "check": "findings include V6.4 ids (e.g. 6.4.1, 6.4.2)"},
         {"text": "Unrelated sections are not listed rule by rule", "check": "no V6.5/V6.6/V6.7/V6.8 rows in the table; they appear only in Sections N/A or not at all"},
-        {"text": "Remediation names the file", "check": "every remediation line references a path or config key"}
+        {"text": "Each finding explains why and names the file", "check": "every Findings entry has a Why it matters line that goes beyond the CWE boilerplate and a Fix line that references a path or config key"}
       ]
     }
   ]
