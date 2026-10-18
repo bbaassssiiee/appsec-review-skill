@@ -57,13 +57,29 @@ secure code review:
 
 If you don't give a level, the skill checks at L2 and says so in the report.
 
+The agent does not read whole chapters. It first inventories the code, triages the
+ASVS sections against that inventory, and then pulls in only the applicable
+requirements with the bundled query script:
+
+```sh
+skills/appsec-review/scripts/asvs-rules.py --chapter V6 --format sections   # what is in V6
+skills/appsec-review/scripts/asvs-rules.py --section V6.2 V6.3 --level 2     # full text of two sections
+skills/appsec-review/scripts/asvs-rules.py --keyword jwt --level 2           # across all chapters
+skills/appsec-review/scripts/asvs-rules.py --id 6.2.1 --with-cwe             # one requirement
+```
+
+The script needs only Python 3 (PyYAML is used when present) and is handy on its own,
+for example to look up a requirement from the terminal.
+
 ## Layout
 
 ```text
 skills/appsec-review/   the skill (this is what gets installed)
-  SKILL.md              instructions: routing, procedure, report format
+  SKILL.md              instructions: routing, triage, procedure, report format
+  scripts/asvs-rules.py query the rules by chapter, section, level, id or keyword
   rules/                asvs-v<N>-rules.yml, one per chapter
   references/           ASVS 5.0.0 chapters and appendices (Markdown)
+tests/                  pytest suite for asvs-rules.py
 scripts/                maintainer tooling, not part of the installed skill
   generate-asvs-rules.sh  rebuild rules/ from references/ (runs the CWE enrichment)
   enrich-rules-with-cwe.py  add CWE fields to the rules
@@ -89,6 +105,7 @@ Individual checks and the rules generator:
 ```sh
 scripts/check-skill.py              # SKILL.md frontmatter and referenced files
 scripts/asvs.sh verify              # every requirement in references/ has a rule
+python3 -m pytest -q tests          # the query script, with and without PyYAML
 scripts/asvs.sh stats               # rule counts per chapter
 
 # Rebuilding the rules needs the CWE-699 XML view from
