@@ -71,15 +71,31 @@ skills/appsec-review/scripts/asvs-rules.py --id 6.2.1 --with-cwe             # o
 The script needs only Python 3 (PyYAML is used when present) and is handy on its own,
 for example to look up a requirement from the terminal.
 
+The report is rendered from a small findings file rather than typed out, so ids are
+checked against the standard, the CWE links and levels are filled in from the rules,
+and the summary counts are computed:
+
+```sh
+skills/appsec-review/scripts/asvs-report.py --example > findings.json   # the format
+skills/appsec-review/scripts/asvs-report.py findings.json -o asvs-report.md
+skills/appsec-review/scripts/asvs-report.py findings.json --format json # for CI or tooling
+```
+
+Every `FAIL` and `PARTIAL` carries a remediation. For a design document there is no
+code to cite; the agent then works from `assets/design-review-checklist.md`, which maps
+the documentation and design requirements to questions.
+
 ## Layout
 
 ```text
 skills/appsec-review/   the skill (this is what gets installed)
   SKILL.md              instructions: routing, triage, procedure, report format
   scripts/asvs-rules.py query the rules by chapter, section, level, id or keyword
+  scripts/asvs-report.py render and validate the report from a findings file
+  assets/               findings-file schema and the design-review checklist
   rules/                asvs-v<N>-rules.yml, one per chapter
   references/           ASVS 5.0.0 chapters and appendices (Markdown)
-tests/                  pytest suite for asvs-rules.py
+tests/                  pytest suite for the skill scripts
 scripts/                maintainer tooling, not part of the installed skill
   generate-asvs-rules.sh  rebuild rules/ from references/ (runs the CWE enrichment)
   enrich-rules-with-cwe.py  add CWE fields to the rules
@@ -105,7 +121,7 @@ Individual checks and the rules generator:
 ```sh
 scripts/check-skill.py              # SKILL.md frontmatter and referenced files
 scripts/asvs.sh verify              # every requirement in references/ has a rule
-python3 -m pytest -q tests          # the query script, with and without PyYAML
+python3 -m pytest -q tests          # the skill scripts, with and without PyYAML
 scripts/asvs.sh stats               # rule counts per chapter
 
 # Rebuilding the rules needs the CWE-699 XML view from

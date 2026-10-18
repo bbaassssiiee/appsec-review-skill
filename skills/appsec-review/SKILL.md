@@ -19,7 +19,10 @@ Start every message produced under this skill with `💂🏼`, including questio
 | Path | Content |
 |---|---|
 | `scripts/asvs-rules.py` | Query the rules by chapter, section, level, id or keyword. Use this instead of reading the rules files. |
-| `rules/asvs-v<N>-rules.yml` | Requirements for chapter V<N>, one entry per requirement. The script reads these; open one directly only if the script can't run. |
+| `scripts/asvs-report.py` | Render the report from a findings file: validates ids and statuses, adds level and CWE, computes the summary. |
+| `assets/report-schema.json` | The findings file format that `asvs-report.py` reads. |
+| `assets/design-review-checklist.md` | Questions for the plan and design phase, each mapped to a requirement id. |
+| `rules/asvs-v<N>-rules.yml` | Requirements for chapter V<N>, one entry per requirement. The scripts read these; open one directly only if the scripts can't run. |
 | `references/0x1?-V<N>-*.md`, `references/0x2?-V<N>-*.md` | The ASVS chapter text: control objectives, section introductions, and the original requirement tables. Read when you need context or rationale. |
 | `references/0x03-What-is-the-ASVS.md` | Scope and the meaning of the levels |
 | `references/0x92-Appendix-C_Cryptography.md` | Approved algorithms, key sizes, and modes (needed for V11) |
@@ -141,6 +144,46 @@ Load only the chapters that apply. Choose them by what is being verified. If onl
 
 When the user names more than one phase, combine the chapters, remove duplicates, and keep them in chapter order. Skip chapters that clearly don't apply to the system. For example, skip V17 when there is no WebRTC and V10 when there is no OAuth. List the skipped chapters in the report.
 
+### By feature, down to the section
+
+Chapters are coarse; most of their sections only apply when a specific feature exists. Use this table during triage (procedure step 4) to decide which sections to load. Sections not mentioned here apply whenever their chapter does.
+
+| Feature in the inventory | Sections that apply only then |
+|---|---|
+| Database or query language access | V1.2 (query-related rules) |
+| Rich-text or HTML input, templates, dynamic code evaluation | V1.3 |
+| Memory-unsafe language or unmanaged code | V1.4 |
+| Deserialization of untrusted data | V1.5 |
+| Bots, scraping or abuse are a concern; public forms | V2.4 |
+| Cookies | V3.3 |
+| Cross-origin access, CORS, iframes, postMessage | V3.5 |
+| Third-party scripts or CDN resources | V3.6 |
+| GraphQL | V4.3 |
+| WebSocket | V4.4 |
+| File upload | V5.1, V5.2, V5.3 |
+| File download or serving user-supplied files | V5.4 |
+| Passwords | V6.2 |
+| Credential recovery, factor enrolment or reset | V6.4 |
+| Multi-factor authentication | V6.5 |
+| Out-of-band authentication (push, SMS, email codes) | V6.6 |
+| Cryptographic authenticators (passkeys, certificates, hardware keys) | V6.7 |
+| External identity provider, SSO | V6.8, V7.6 |
+| OAuth client | V10.2, V10.5 |
+| OAuth resource server (API accepting access tokens) | V10.3 |
+| OAuth authorization server, OpenID provider | V10.4, V10.6, V10.7 |
+| Self-contained tokens (JWT, SAML) issued or accepted | V9.1, V9.2 |
+| Hashing of passwords or data | V11.4 |
+| Public-key cryptography, signatures | V11.6 |
+| Data processed in memory on untrusted hosts, confidential computing | V11.7 |
+| Service-to-service calls, backend integrations | V12.3, V13.2 |
+| Secrets (API keys, credentials) held by the application | V13.3 |
+| Data stored or cached on the client | V14.3 |
+| Third-party dependencies | V15.1 (dependency rules), V15.2 |
+| Concurrency, shared state, background jobs | V15.4 |
+| WebRTC | V17.1, V17.2, V17.3 |
+
+The *Documentation* sections (V1.1, V2.1, V3.1, V5.1, V6.1, V7.1, V8.1, V11.1, V13.1, V14.1, V15.1, V16.1) verify that design decisions are written down. In a code review they are `UNVERIFIED` unless the design documentation is in scope; say so once rather than per rule. In a design review they are the main content: use `assets/design-review-checklist.md`.
+
 ## Procedure
 
 1. **Scope**: decide what is being verified (repository, directory, diff or PR, design document, or configuration) and the target level.
@@ -155,9 +198,14 @@ When the user names more than one phase, combine the chapters, remove duplicates
    - `PARTIAL`: met in some places but not all.
    - `N/A`: the feature doesn't exist in scope. Give the reason.
    - `UNVERIFIED`: can't be decided from the available material. Say what evidence is missing.
-8. **Report** as below.
+8. **Remediate**: for every `FAIL` and `PARTIAL`, say what to change and where, in one or two sentences. Name the file or config key and the concrete target (a value, a library call, a header), not a restatement of the requirement. If the fix is a design decision rather than a code change, say who has to make it.
+9. **Report** as below.
 
 Don't mark a rule `PASS` without evidence. Leaving a rule `UNVERIFIED` is better than guessing.
+
+### Design documents and the plan phase
+
+When the scope is a design document, an architecture description or a feature proposal, there is no `path:line` to cite. Use `assets/design-review-checklist.md`: it turns the documentation requirements and the design-oriented rules into questions, each mapped to a requirement id. The design's answer to a question is the evidence; cite the section of the document. A question the document doesn't answer is `UNVERIFIED` with the question itself as the missing evidence, so the author knows what to add.
 
 ### Diffs and pull requests
 
@@ -168,6 +216,13 @@ When the scope is a diff or PR, the question is whether the *change* meets ASVS,
 For "which requirements apply to X?" or "what does ASVS say about Y?", skip inventory and triage: run `--keyword` or `--section` with the level, and answer from the output.
 
 ## Report format
+
+Produce the report in two steps rather than typing the table by hand:
+
+1. Write your decisions to a findings file, one entry per rule (`id`, `status`, `evidence`, `remediation`), plus scope, level, inventory, chapters, skipped chapters, sections marked N/A, top risks and missing evidence. The format is `assets/report-schema.json`; `scripts/asvs-report.py --example` prints a filled-in example.
+2. Run `scripts/asvs-report.py findings.json -o asvs-report.md`. It rejects unknown ids, invalid statuses, failures without remediation and rules above the target level, then adds the level, rule text and CWE link from the rules files and computes the summary counts.
+
+Show the rendered report to the user and keep the findings file next to it; `--format json` gives a normalised JSON version for tooling or CI. When the script can't run, write the same report by hand in the format below.
 
 ```markdown
 💂🏼 ASVS 5.0.0 verification: <scope>, target L<n>
@@ -184,6 +239,9 @@ Summary: <n> PASS, <n> FAIL, <n> PARTIAL, <n> N/A, <n> UNVERIFIED
 
 Top risks
 1. ...
+
+Remediation
+- v5.0.0-6.2.1 (FAIL): raise the minimum in `auth/password.py:42` to 8 (15 recommended) and mirror it in the signup form validation.
 
 Missing evidence
 - ...

@@ -5,7 +5,7 @@ Checks per skill:
   - frontmatter present with `name` and `description`
   - name: 1-64 chars, lowercase letters, digits and hyphens, equal to the folder name
   - description: 1-1024 chars
-  - every backticked or linked path under rules/, references/ or scripts/ exists
+  - every backticked or linked path under rules/, references/, scripts/ or assets/ exists
     (paths with placeholders such as <N> or * are skipped)
 
 Usage:
@@ -18,7 +18,7 @@ import sys
 
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
-PATH_RE = re.compile(r"(?:`|\]\()((?:rules|references|scripts)/[^`)\s]+)")
+PATH_RE = re.compile(r"(?:`|\]\()((?:rules|references|scripts|assets)/[^`)\s]+)")
 PLACEHOLDER = re.compile(r"[<>*?]")
 
 

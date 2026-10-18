@@ -27,9 +27,9 @@ repos:
         files: ^(skills/appsec-review/(rules|references)/|scripts/asvs\.sh$)
         pass_filenames: false
       - id: asvs-rules-script
-        name: asvs-rules.py query script tests
+        name: skill scripts (asvs-rules.py, asvs-report.py) tests
         entry: python3 -m pytest -q tests
         language: python
         additional_dependencies: [pytest, pyyaml]
-        files: ^(skills/appsec-review/(rules|scripts)/|tests/)
+        files: ^(skills/appsec-review/(rules|scripts|assets)/|tests/)
         pass_filenames: false
