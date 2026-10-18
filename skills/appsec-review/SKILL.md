@@ -6,7 +6,9 @@ license: CC-BY-SA-4.0
 
 # OWASP ASVS 5.0.0
 
-This skill holds the full text of OWASP ASVS 5.0.0 (`references/`) and one machine-readable rules file per chapter (`rules/`). Use it to check whether an application meets the ASVS requirements, and to back each verdict with evidence.
+This skill holds the full text of OWASP ASVS 5.0.0 (`references/`), one machine-readable rules file per chapter (`rules/`), and a query script (`scripts/asvs-rules.py`) that returns only the requirements you ask for. Use it to check whether an application meets the ASVS requirements, and to back each verdict with evidence.
+
+The rules files are large (the 17 chapters together are about 55k tokens; V6 alone is 8k). Reading them whole fills the context with requirements that will end up `N/A`. Use the script to pull in only the sections and levels that apply.
 
 ## Output style
 
@@ -16,7 +18,8 @@ Start every message produced under this skill with `💂🏼`, including questio
 
 | Path | Content |
 |---|---|
-| `rules/asvs-v<N>-rules.yml` | Requirements for chapter V<N>, one entry per requirement. Read these first. |
+| `scripts/asvs-rules.py` | Query the rules by chapter, section, level, id or keyword. Use this instead of reading the rules files. |
+| `rules/asvs-v<N>-rules.yml` | Requirements for chapter V<N>, one entry per requirement. The script reads these; open one directly only if the script can't run. |
 | `references/0x1?-V<N>-*.md`, `references/0x2?-V<N>-*.md` | The ASVS chapter text: control objectives, section introductions, and the original requirement tables. Read when you need context or rationale. |
 | `references/0x03-What-is-the-ASVS.md` | Scope and the meaning of the levels |
 | `references/0x92-Appendix-C_Cryptography.md` | Approved algorithms, key sizes, and modes (needed for V11) |
@@ -43,7 +46,31 @@ rules:
       url: "https://cwe.mitre.org/data/definitions/521.html"
 ```
 
-When citing a requirement, use the ASVS notation `v5.0.0-<id>`, for example `v5.0.0-6.2.1`.
+When citing a requirement, use the ASVS notation `v5.0.0-<id>`, for example `v5.0.0-6.2.1`. The script prints ids in this notation.
+
+## Loading rules
+
+`scripts/asvs-rules.py` needs only Python 3 (it uses PyYAML when installed and falls back to its own parser otherwise). Run it from the skill directory or by absolute path. Work from coarse to fine:
+
+```sh
+# 1. What is in a chapter? One line per section with rule counts per level. ~0.1k tokens.
+scripts/asvs-rules.py --chapter V6 --format sections
+
+# 2. Which requirements are in the sections that apply? One line per rule, text truncated. ~1k tokens.
+scripts/asvs-rules.py --chapter V6 --level 2 --format ids
+
+# 3. Full text, only for the sections you will actually verify.
+scripts/asvs-rules.py --section V6.2 V6.3 --level 2 --with-cwe
+
+# Other filters
+scripts/asvs-rules.py --keyword jwt token --level 2        # across all chapters
+scripts/asvs-rules.py --id 6.2.1 7.2.1 --with-cwe          # specific requirements
+scripts/asvs-rules.py --chapter V6 --format json           # full objects, for tooling
+```
+
+`--level N` keeps rules with level ≤ N, which is what "checking at level N" means. Combine filters freely; all of them must match.
+
+If the script can't run (no Python, or the agent can't execute scripts), read `rules/asvs-v<N>-rules.yml` directly, but one chapter at a time and only the chapters you routed to.
 
 ## Chapters
 
@@ -116,25 +143,37 @@ When the user names more than one phase, combine the chapters, remove duplicates
 
 ## Procedure
 
-1. **Scope**: decide what is being verified (repository, directory, diff or PR, design document, or configuration), which technologies it uses, and the target level.
-2. **Route**: pick the chapters using the tables above.
-3. **Load the rules**: read `rules/asvs-v<N>-rules.yml` for each chapter and keep the rules with `level <= target`. Open the reference chapter only for requirements whose intent is unclear.
-4. **Collect evidence**: for each rule, search the code, configuration, tests, pipeline definitions, and docs. Cite concrete locations (`path:line`), test names, or config keys.
-5. **Judge** each rule:
+1. **Scope**: decide what is being verified (repository, directory, diff or PR, design document, or configuration) and the target level.
+2. **Inventory** the scope before touching any rules: languages and frameworks, entry points (web UI, REST/GraphQL, WebSocket), authentication mechanisms (password, MFA, OAuth/OIDC, SSO), token formats (JWT, opaque sessions), file upload/download, crypto usage, external services, build and deploy configuration. A few searches (`grep`, dependency manifests, route definitions, config files) are enough. Write the inventory down in one short list; it drives the next two steps and goes in the report.
+3. **Route**: pick the chapters using the tables above.
+4. **Triage by section**: run `--format sections` for each routed chapter and decide per section whether it applies to the inventory. Sections for features that aren't there (for example V6.6 Out-of-Band when there is no OOB authentication, V6.7 when there are no cryptographic authenticators, V5.x archive handling when nothing extracts archives) become `N/A` as a whole, with the reason, and their rules are never loaded. Only the remaining sections go to the next step.
+5. **Load the rules** for the remaining sections at the target level (`--section ... --level N`). Open the reference chapter only for requirements whose intent is unclear.
+6. **Collect evidence**: for each rule, search the code, configuration, tests, pipeline definitions, and docs. Cite concrete locations (`path:line`), test names, or config keys.
+7. **Judge** each rule:
    - `PASS`: evidence shows the requirement is met.
    - `FAIL`: evidence shows it is not met. Say what is wrong and where.
    - `PARTIAL`: met in some places but not all.
    - `N/A`: the feature doesn't exist in scope. Give the reason.
    - `UNVERIFIED`: can't be decided from the available material. Say what evidence is missing.
-6. **Report** as below.
+8. **Report** as below.
 
 Don't mark a rule `PASS` without evidence. Leaving a rule `UNVERIFIED` is better than guessing.
+
+### Diffs and pull requests
+
+When the scope is a diff or PR, the question is whether the *change* meets ASVS, not the whole application. Inventory only what the diff touches, route from that, and judge only the rules the changed code can affect. Rules about code outside the diff are out of scope, not `UNVERIFIED`; say so in one line. If the diff introduces a feature that pulls in a whole section (a new login flow, a new upload endpoint), that section is in scope.
+
+### Quick questions
+
+For "which requirements apply to X?" or "what does ASVS say about Y?", skip inventory and triage: run `--keyword` or `--section` with the level, and answer from the output.
 
 ## Report format
 
 ```markdown
 💂🏼 ASVS 5.0.0 verification: <scope>, target L<n>
+Inventory: Django 5 + DRF, password login with TOTP, opaque sessions, no OAuth, S3 uploads
 Chapters: V6, V7, V8 (skipped: V17 no WebRTC)
+Sections N/A: V6.6 (no out-of-band auth), V6.7 (no cryptographic authenticators), V6.8 (no IdP)
 
 | Requirement | L | Status | Evidence / finding | CWE |
 |---|---|---|---|---|
@@ -151,6 +190,8 @@ Missing evidence
 ```
 
 In the CWE column, write each CWE as a Markdown link to its MITRE page: `CWE-<ID>` links to `https://cwe.mitre.org/data/definitions/<ID>.html`, where `<ID>` is the number only (so `CWE-78` becomes `[CWE-78](https://cwe.mitre.org/data/definitions/78.html)`). Separate multiple CWEs with a comma, and leave the cell empty when there is no mapping.
+
+Rules in a section marked `N/A` during triage are not listed one by one; the `Sections N/A` line covers them, and they are not counted in the summary.
 
 For a quick question such as "which requirements apply to X?", skip the table and list the relevant requirement IDs with one-line summaries.
 
