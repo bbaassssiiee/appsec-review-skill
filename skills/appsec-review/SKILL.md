@@ -1,6 +1,6 @@
 ---
 name: appsec-review
-description: Verify code, designs, and configuration against the OWASP Application Security Verification Standard (ASVS) 5.0.0 at Level 1, 2, or 3. Use when the user mentions ASVS, OWASP, verification requirements, application security requirements, a secure code review, security hardening, or asks which security requirements apply to a feature, component, or SDLC phase (plan, code, test, build, deploy, operate). Routes to the relevant ASVS chapters (V1-V17), checks each requirement against evidence, and reports gaps with CWE references.
+description: Verify code, designs, pull requests and configuration against the OWASP Application Security Verification Standard (ASVS) 5.0.0 at Level 1, 2, or 3. Use whenever the user mentions ASVS, OWASP, appsec or application security, asks whether a login, session, upload, API, token or other feature is secure enough, asks which security requirements apply to a feature, component, design document or SDLC phase (plan, code, test, build, deploy, operate), or wants a security review of code or a diff before merging. Also use for "what does ASVS/OWASP say about X" questions. Routes to the relevant ASVS chapters (V1-V17), loads only the applicable sections, checks each requirement against evidence, and reports PASS/FAIL with remediation and CWE references.
 license: CC-BY-SA-4.0
 ---
 

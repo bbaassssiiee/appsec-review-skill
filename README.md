@@ -130,6 +130,33 @@ scripts/generate-asvs-rules.sh
 CWE_CATALOG=/path/to/cwec_v4.20.xml scripts/generate-asvs-rules.sh   # also resolve CWEs outside the view
 ```
 
+## Testing the skill itself
+
+`evals/` holds two kinds of test material:
+
+- `trigger-evals.json`: prompts that should and should not make an agent pick this
+  skill. The negatives are near-misses (CWE lookups, OS hardening, SOC 2, a PR review
+  with no security angle), not unrelated tasks.
+- `evals.json`: task prompts with assertions on the result (guard emoji, only the
+  applicable sections loaded, Sections N/A line, remediation per failure, findings file
+  that validates). Evals 3 and 4 need a repository with a login flow to run against.
+
+Measuring triggering needs the `claude` CLI and Anthropic's
+[skill-creator](https://github.com/anthropics/skills) skill, which has the loop:
+
+```sh
+# one-off check of a single prompt
+claude -p "Is ons wachtwoordbeleid streng genoeg? Minimaal 6 tekens, geen MFA." --verbose | grep -i appsec-review
+
+# the full loop: scores the current description, proposes a better one, re-scores
+cd <skill-creator>
+python -m scripts.run_loop --eval-set <repo>/evals/trigger-evals.json \
+  --skill-path <repo>/skills/appsec-review --max-iterations 5 --verbose
+```
+
+Paste the resulting `best_description` into `SKILL.md` and run `pytest` so the
+trigger words stay covered.
+
 ## License
 
 [CC BY-SA 4.0](LICENSE). The ASVS content is © 2008-2025 The OWASP Foundation and
