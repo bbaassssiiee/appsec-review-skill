@@ -70,7 +70,12 @@ def test_markdown_report(findings):
     assert [r.split(" | ")[0] for r in rows] == ["| v5.0.0-6.1.1", "| v5.0.0-6.2.1", "| v5.0.0-6.4.1", "| v5.0.0-7.2.1"]
     assert "| v5.0.0-6.2.1 | 1 | FAIL | `auth/password.py:42` minimum length is 6 | [CWE-521](https://cwe.mitre.org/data/definitions/521.html) |" in out
     assert "Summary: 1 PASS, 1 FAIL, 0 PARTIAL, 1 N/A, 1 UNVERIFIED" in out
-    assert "Remediation\n- v5.0.0-6.2.1 (FAIL): Raise the minimum to 8." in out
+    assert "Findings\n\n### v5.0.0-6.2.1 FAIL (L1)\n" in out
+    assert "Requirement: User set passwords are at least 8 characters" in out
+    assert "Found: `auth/password.py:42` minimum length is 6" in out
+    assert "Why it matters: [CWE-521](https://cwe.mitre.org/data/definitions/521.html) Weak Password Requirements: An attacker could easily guess" in out
+    assert "Fix: Raise the minimum to 8." in out
+    assert "### v5.0.0-7.2.1" not in out  # PASS gets no Findings entry
     assert "Top risks\n1. Short passwords accepted (6.2.1)" in out
     assert "Missing evidence\n- Authentication documentation" in out
 

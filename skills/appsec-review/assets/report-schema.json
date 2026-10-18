@@ -25,6 +25,7 @@
           "status": {"type": "string", "enum": ["PASS", "FAIL", "PARTIAL", "N/A", "UNVERIFIED"]},
           "evidence": {"type": "string", "description": "Concrete location (`path:line`), test name or config key, and what it shows. Required for PASS, FAIL and PARTIAL."},
           "reason": {"type": "string", "description": "For N/A: why the requirement does not apply. For UNVERIFIED: what evidence is missing."},
+          "why": {"type": "string", "description": "For FAIL and PARTIAL: what an attacker gains from this gap in this application, in one or two sentences. The renderer prefixes the CWE name and its typical consequence; use this for the application-specific part."},
           "remediation": {"type": "string", "description": "What to change, where. Required for FAIL and PARTIAL."}
         }
       }

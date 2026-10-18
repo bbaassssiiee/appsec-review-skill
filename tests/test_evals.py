@@ -28,17 +28,17 @@ def test_trigger_evals_shape_and_balance():
 
 def test_trigger_positives_cover_the_trigger_words():
     items = [it["query"].lower() for it in load("trigger-evals.json") if it["should_trigger"]]
-    for word in ("asvs", "owasp", "appsec", "application security"):
+    for word in ("asvs", "owasp", "cwe", "appsec", "application security"):
         assert any(word in q for q in items), f"no positive query mentions {word!r}"
     # and at least two positives rely on none of them (implicit triggering)
-    implicit = [q for q in items if not any(w in q for w in ("asvs", "owasp", "appsec", "application security"))]
+    implicit = [q for q in items if not any(w in q for w in ("asvs", "owasp", "cwe", "appsec", "application security"))]
     assert len(implicit) >= 2
 
 
 def test_trigger_negatives_avoid_the_trigger_words():
     items = [it["query"].lower() for it in load("trigger-evals.json") if not it["should_trigger"]]
     for q in items:
-        for word in ("asvs", "owasp", "appsec", "application security"):
+        for word in ("asvs", "owasp", "cwe", "appsec", "application security"):
             assert word not in q, f"negative query contains the trigger word {word!r}: {q}"
 
 
@@ -60,6 +60,6 @@ def test_description_names_the_trigger_words():
     with open(SKILL_MD, encoding="utf-8") as fh:
         head = fh.read().split("---", 2)[1]
     desc = re.search(r"^description:\s*(.+)$", head, re.M).group(1).lower()
-    for word in ("asvs", "owasp", "appsec", "application security"):
+    for word in ("asvs", "owasp", "cwe", "appsec", "application security"):
         assert word in desc, f"description does not mention {word!r}"
     assert len(desc) <= 1024
