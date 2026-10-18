@@ -144,7 +144,7 @@ When the user names more than one phase, combine the chapters, remove duplicates
 ## Procedure
 
 1. **Scope**: decide what is being verified (repository, directory, diff or PR, design document, or configuration) and the target level.
-2. **Inventory** the scope before touching any rules: languages and frameworks, entry points (web UI, REST/GraphQL, WebSocket), authentication mechanisms (password, MFA, OAuth/OIDC, SSO), token formats (JWT, opaque sessions), file upload/download, crypto usage, external services, build and deploy configuration. A few searches (`grep`, dependency manifests, route definitions, config files) are enough. Write the inventory down in one short list; it drives the next two steps and goes in the report.
+2. **Inventory** the scope before touching any rules. List the security-relevant features, not the technology stack: entry points (web UI, REST/GraphQL, WebSocket), authentication mechanisms (password, MFA, OAuth/OIDC, SSO), token formats (JWT, opaque sessions), file upload/download, crypto usage, external services, build and deploy configuration. A few searches (`grep`, dependency manifests, route definitions, config files) are enough. Recognizing what a given language or framework does for each feature is left to you; the skill carries no stack-specific knowledge. Write the inventory down in one short list; it drives the next two steps and goes in the report.
 3. **Route**: pick the chapters using the tables above.
 4. **Triage by section**: run `--format sections` for each routed chapter and decide per section whether it applies to the inventory. Sections for features that aren't there (for example V6.6 Out-of-Band when there is no OOB authentication, V6.7 when there are no cryptographic authenticators, V5.x archive handling when nothing extracts archives) become `N/A` as a whole, with the reason, and their rules are never loaded. Only the remaining sections go to the next step.
 5. **Load the rules** for the remaining sections at the target level (`--section ... --level N`). Open the reference chapter only for requirements whose intent is unclear.
@@ -171,7 +171,7 @@ For "which requirements apply to X?" or "what does ASVS say about Y?", skip inve
 
 ```markdown
 💂🏼 ASVS 5.0.0 verification: <scope>, target L<n>
-Inventory: Django 5 + DRF, password login with TOTP, opaque sessions, no OAuth, S3 uploads
+Inventory: web UI + REST API, password login with TOTP, opaque server-side sessions, no OAuth, file uploads to object storage
 Chapters: V6, V7, V8 (skipped: V17 no WebRTC)
 Sections N/A: V6.6 (no out-of-band auth), V6.7 (no cryptographic authenticators), V6.8 (no IdP)
 
