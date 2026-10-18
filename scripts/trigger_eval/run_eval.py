@@ -84,6 +84,7 @@ def run_single_query(
 
         process = subprocess.Popen(
             cmd,
+            stdin=subprocess.DEVNULL,
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
             cwd=project_root,
@@ -153,7 +154,10 @@ def run_single_query(
                             if se_type == "message_stop":
                                 return False
 
-                    # Fallback: full assistant message
+                    # Fallback: assistant message. Claude Code emits one
+                    # "assistant" event per content block (thinking, text,
+                    # tool_use), so only decide once a tool_use block shows
+                    # up; a thinking or text block says nothing yet.
                     elif event.get("type") == "assistant":
                         message = event.get("message", {})
                         for content_item in message.get("content", []):
