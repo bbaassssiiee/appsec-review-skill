@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bbaassssiiee/appsec-review-skill/assets/report-schema.json",
+  "title": "ASVS verification findings",
+  "description": "Input for scripts/asvs-report.py. Record only decisions; the script adds level, rule text and CWE from the rules files and computes the summary.",
+  "type": "object",
+  "required": ["scope", "level", "findings"],
+  "additionalProperties": false,
+  "properties": {
+    "scope": {"type": "string", "description": "What was verified: repository, directory, diff or PR, design document, configuration."},
+    "level": {"type": "integer", "enum": [1, 2, 3], "description": "Target ASVS level. Findings may only reference rules at this level or below."},
+    "inventory": {"type": "array", "items": {"type": "string"}, "description": "Security-relevant features found in scope (not the technology stack)."},
+    "chapters": {"type": "array", "items": {"type": "string", "pattern": "^V([1-9]|1[0-7])$"}, "description": "Chapters that were verified."},
+    "skipped_chapters": {"type": "object", "additionalProperties": {"type": "string"}, "description": "Chapter id -> reason it was not verified."},
+    "sections_na": {"type": "object", "additionalProperties": {"type": "string"}, "description": "Section id -> reason the whole section is not applicable. Its rules are not listed in findings."},
+    "findings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "status"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string", "description": "Requirement id: 6.2.1, v5.0.0-6.2.1 or ASVS-V6-6.2.1."},
+          "status": {"type": "string", "enum": ["PASS", "FAIL", "PARTIAL", "N/A", "UNVERIFIED"]},
+          "evidence": {"type": "string", "description": "Concrete location (`path:line`), test name or config key, and what it shows. Required for PASS, FAIL and PARTIAL."},
+          "reason": {"type": "string", "description": "For N/A: why the requirement does not apply. For UNVERIFIED: what evidence is missing."},
+          "remediation": {"type": "string", "description": "What to change, where. Required for FAIL and PARTIAL."}
+        }
+      }
+    },
+    "top_risks": {"type": "array", "items": {"type": "string"}, "description": "Most important failures first, in the reviewer's words, each naming the requirement id."},
+    "missing_evidence": {"type": "array", "items": {"type": "string"}, "description": "What the reviewer would need to settle the UNVERIFIED rules."}
+  }
+}
