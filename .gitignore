@@ -4,3 +4,6 @@ __pycache__/
 # CWE catalogs are large downloads, see scripts/enrich-rules-with-cwe.py
 scripts/cwe.xml
 scripts/cwec_*.xml
+# written by the trigger-eval loop (scripts/trigger_eval/)
+.claude/commands/
+evals/results/

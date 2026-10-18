@@ -31,5 +31,5 @@ repos:
         entry: python3 -m pytest -q tests
         language: python
         additional_dependencies: [pytest, pyyaml]
-        files: ^(skills/appsec-review/(SKILL\.md|rules/|scripts/|assets/)|tests/|evals/)
+        files: ^(skills/appsec-review/(SKILL\.md|rules/|scripts/|assets/)|scripts/trigger_eval/|tests/|evals/)
         pass_filenames: false

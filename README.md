@@ -100,6 +100,7 @@ skills/appsec-review/   the skill (this is what gets installed)
   references/           ASVS 5.0.0 chapters and appendices (Markdown)
 tests/                  pytest suite for the skill scripts
 scripts/                maintainer tooling, not part of the installed skill
+  trigger_eval/         description trigger-accuracy loop (vendored from skill-creator, Apache 2.0)
   generate-asvs-rules.sh  rebuild rules/ from references/ (runs the CWE enrichment)
   enrich-rules-with-cwe.py  add CWE fields to the rules
   asvs-5.0.0-cwe-mapping.yml  ASVS id → CWE id mapping
@@ -144,21 +145,36 @@ CWE_CATALOG=/path/to/cwec_v4.20.xml scripts/generate-asvs-rules.sh   # also reso
   applicable sections loaded, Sections N/A line, remediation per failure, findings file
   that validates). Evals 3 and 4 need a repository with a login flow to run against.
 
-Measuring triggering needs the `claude` CLI and Anthropic's
-[skill-creator](https://github.com/anthropics/skills) skill, which has the loop:
+Measuring triggering needs the `claude` CLI (Claude Code) and nothing else: the loop
+from Anthropic's skill-creator is vendored in `scripts/trigger_eval/` (Apache 2.0, see
+the LICENSE.txt there). It scores the current description by running each query through
+`claude -p` several times, asks Claude to propose a better description from the misses,
+re-scores on a held-out split to avoid overfitting, and keeps the best one.
 
 ```sh
 # one-off check of a single prompt
 claude -p "Is ons wachtwoordbeleid streng genoeg? Minimaal 6 tekens, geen MFA." --verbose | grep -i appsec-review
 
-# the full loop: scores the current description, proposes a better one, re-scores
-cd <skill-creator>
-python -m scripts.run_loop --eval-set <repo>/evals/trigger-evals.json \
-  --skill-path <repo>/skills/appsec-review --max-iterations 5 --verbose
+# the full loop, from the repository root
+python3 -m scripts.trigger_eval.run_loop \
+  --eval-set evals/trigger-evals.json \
+  --skill-path skills/appsec-review \
+  --model claude-sonnet-4-5 \
+  --max-iterations 5 --results-dir evals/results --verbose
+
+# score the current description only, no improvement step
+python3 -m scripts.trigger_eval.run_eval \
+  --eval-set evals/trigger-evals.json --skill-path skills/appsec-review --verbose
 ```
 
-Paste the resulting `best_description` into `SKILL.md` and run `pytest` so the
-trigger words stay covered.
+`--model` is the model used to propose new descriptions; the triggering test itself uses
+your configured Claude Code model unless you pass `--model` to `run_eval`. The loop
+writes temporary command files under `.claude/commands/` while it runs and its outputs
+under `evals/results/`; both are git-ignored. Each query costs a `claude -p` call, so a
+full run with the default 3 runs per query is about 70 calls per iteration.
+
+When it finishes, paste `best_description` from the JSON output into `SKILL.md` and run
+`pytest` so the trigger words stay covered.
 
 ## License
 
