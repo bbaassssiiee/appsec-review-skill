@@ -10,10 +10,6 @@ This skill holds the full text of OWASP ASVS 5.0.0 (`references/`), one machine-
 
 The rules files are large (the 17 chapters together are about 55k tokens; V6 alone is 8k). Reading them whole fills the context with requirements that will end up `N/A`. Use the script to pull in only the sections and levels that apply.
 
-## Output style
-
-Prefer starting messages produced under this skill with `💂🏼` for consistency, including questions, menus, summaries, and conclusions. If the host or user style guidance conflicts, follow host/user guidance. Code blocks are not prefixed.
-
 ## Files
 
 | Path | Content |
