@@ -1,6 +1,6 @@
 ---
 name: appsec-review
-description: Verify code, designs, PRs and config against the OWASP Application Security Verification Standard (ASVS) 5.0.0 at Level 1-3. Use whenever the user mentions ASVS, OWASP, CWE, appsec or application security, asks whether a login, session, upload, API, token or other feature is secure enough, asks what to get right security-wise when building or changing a feature (OAuth, password reset, upload), asks which security requirements apply to a feature, design document or SDLC phase (plan, code, test, build, deploy, operate), wants a security review of code, a PR or a diff before merging, or needs an appsec compliance report for an audit. Also use for "what does ASVS/OWASP say about X" questions. Invoke it before reading the code or diff, because it says what to look for. Routes to the relevant ASVS chapters (V1-V17), loads only the applicable sections, checks each requirement against evidence, and reports PASS/FAIL, explaining each failure with its CWE weakness, why it matters and how to fix it.
+description: Review code, PRs, designs, and configuration against OWASP ASVS 5.0.0 (L1-L3). Use for ASVS/OWASP/CWE or application-security questions, feature-specific requirement lookups (for example login, sessions, upload, API, tokens, OAuth), and security/compliance reviews before merge or audit. Route to relevant ASVS chapters, load only applicable sections, evaluate evidence, and report PASS/FAIL/PARTIAL/N/A/UNVERIFIED with risk and remediation.
 license: CC-BY-SA-4.0
 ---
 
@@ -12,7 +12,7 @@ The rules files are large (the 17 chapters together are about 55k tokens; V6 alo
 
 ## Output style
 
-Start every message produced under this skill with `💂🏼`, including questions, menus, summaries, and conclusions. Code blocks are not prefixed.
+Prefer starting messages produced under this skill with `💂🏼` for consistency, including questions, menus, summaries, and conclusions. If the host or user style guidance conflicts, follow host/user guidance. Code blocks are not prefixed.
 
 ## Files
 
@@ -73,7 +73,7 @@ scripts/asvs-rules.py --chapter V6 --format json           # full objects, for t
 
 `--level N` keeps rules with level ≤ N, which is what "checking at level N" means. Combine filters freely; all of them must match.
 
-If the script can't run (no Python, or the agent can't execute scripts), read `rules/asvs-v<N>-rules.yml` directly, but one chapter at a time and only the chapters you routed to.
+If the script can't run (no Python, script execution disabled, or the agent can't execute scripts), immediately fall back to reading `rules/asvs-v<N>-rules.yml` directly, one chapter at a time and only for routed chapters.
 
 ## Chapters
 
