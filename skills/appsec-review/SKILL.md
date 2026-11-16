@@ -1,6 +1,8 @@
 ---
 name: appsec-review
 description: Review code, PRs, designs, and configuration against OWASP ASVS 5.0.0 (L1-L3). Use for ASVS/OWASP/CWE or application-security questions, feature-specific requirement lookups (for example login, sessions, upload, API, tokens, OAuth), and security/compliance reviews before merge or audit. Route to relevant ASVS chapters, load only applicable sections, evaluate evidence, and report PASS/FAIL/PARTIAL/N/A/UNVERIFIED with risk and remediation.
+version: 5.0.0
+author: bas.meijer
 license: CC-BY-SA-4.0
 ---
 
@@ -220,6 +222,8 @@ Produce the report in two steps rather than typing the table by hand:
 
 1. Write your decisions to a findings file, one entry per rule (`id`, `status`, `evidence`, and for failures `why` and `remediation`), plus scope, level, inventory, chapters, skipped chapters, sections marked N/A, top risks and missing evidence. The format is `assets/report-schema.json`; `scripts/asvs-report.py --example` prints a filled-in example.
 2. Run `scripts/asvs-report.py findings.json -o asvs-report.md`. It rejects unknown ids, invalid statuses, failures without remediation and rules above the target level, then adds the level, rule text, CWE link, name and typical consequence from the rules files, computes the summary counts, and writes a Findings entry for every `FAIL` and `PARTIAL`.
+
+Findings-file text is rendered literally in Markdown, not as formatting or links. When displaying reports as HTML, sanitize the renderer's output and restrict URL schemes; normalized JSON contains the original text and requires escaping at its own output boundary.
 
 Show the rendered report to the user and keep the findings file next to it; `--format json` gives a normalised JSON version for tooling or CI. When the script can't run, write the same report by hand in the format below.
 
