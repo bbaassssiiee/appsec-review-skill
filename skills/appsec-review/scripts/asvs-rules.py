@@ -28,6 +28,7 @@ Examples:
     asvs-rules.py --keyword jwt token --level 2           # across all chapters
     asvs-rules.py --id 6.2.1 6.2.2 --with-cwe             # specific requirements, with CWE
 """
+
 import argparse
 import glob
 import json
@@ -40,6 +41,7 @@ STANDARD_PREFIX = "v5.0.0-"
 
 
 # --- loading ---------------------------------------------------------------
+
 
 def _parse_minimal(text):
     """Parse the rules file format without PyYAML.
@@ -56,7 +58,7 @@ def _parse_minimal(text):
         if line.startswith("rules:"):
             in_meta = False
             continue
-        m = re.match(r'^(\s*)(- )?([A-Za-z_]+):\s*(.*)$', line)
+        m = re.match(r"^(\s*)(- )?([A-Za-z_]+):\s*(.*)$", line)
         if not m:
             continue
         indent, dash, key, raw = m.groups()
@@ -85,6 +87,11 @@ def _parse_minimal(text):
 
 
 def _scalar(raw):
+    """Convert a raw YAML scalar to None, an unquoted string or an int.
+
+    Empty values become None, double-quoted strings are unquoted and
+    unescaped, integers are converted, anything else is returned as-is.
+    """
     raw = raw.strip()
     if raw == "":
         return None
@@ -96,10 +103,16 @@ def _scalar(raw):
 
 
 def load_chapter(path):
+    """Load one chapter rules file and return (meta, rules).
+
+    Uses PyYAML when installed, otherwise falls back to `_parse_minimal`.
+    Each rule is tagged with its chapter id (e.g. "V6").
+    """
     with open(path, encoding="utf-8") as fh:
         text = fh.read()
     try:
         import yaml  # type: ignore
+
         data = yaml.safe_load(text)
     except ImportError:
         data = _parse_minimal(text)
@@ -111,6 +124,7 @@ def load_chapter(path):
 
 
 def chapter_number(name):
+    """Return the chapter number for "V6", "v6" or "6"; exit on anything else."""
     m = re.fullmatch(r"[Vv]?(\d{1,2})", str(name).strip())
     if not m:
         raise SystemExit(f"error: not a chapter: {name!r} (expected V1..V17)")
@@ -118,11 +132,21 @@ def chapter_number(name):
 
 
 def load(chapters=None):
+    """Load the given chapters (all chapters when empty) in chapter order.
+
+    Returns (metas, rules): a list of per-chapter metadata and a flat list
+    of all rules. Exits with an error if a chapter's rules file is missing.
+    """
     if chapters:
-        paths = [os.path.join(RULES_DIR, f"asvs-v{chapter_number(c)}-rules.yml") for c in chapters]
+        paths = [
+            os.path.join(RULES_DIR, f"asvs-v{chapter_number(c)}-rules.yml")
+            for c in chapters
+        ]
     else:
-        paths = sorted(glob.glob(os.path.join(RULES_DIR, "asvs-v*-rules.yml")),
-                       key=lambda p: int(re.search(r"v(\d+)-rules", p).group(1)))
+        paths = sorted(
+            glob.glob(os.path.join(RULES_DIR, "asvs-v*-rules.yml")),
+            key=lambda p: int(re.search(r"v(\d+)-rules", p).group(1)),
+        )
     metas, rules = [], []
     for p in paths:
         if not os.path.exists(p):
@@ -135,23 +159,31 @@ def load(chapters=None):
 
 # --- filtering -------------------------------------------------------------
 
+
 def short_id(rule_id):
-    """'ASVS-V6-6.2.1' -> '6.2.1'"""
+    """Strip any prefix from a requirement id: 'ASVS-V6-6.2.1' -> '6.2.1'."""
     return rule_id.rsplit("-", 1)[-1]
 
 
 def std_id(rule_id):
+    """Return the official ASVS id form: 'ASVS-V6-6.2.1' -> 'v5.0.0-6.2.1'."""
     return STANDARD_PREFIX + short_id(rule_id)
 
 
 def norm_id(s):
+    """Normalise a user-supplied id ('6.2.1', 'v5.0.0-6.2.1', 'ASVS-V6-6.2.1') to '6.2.1'."""
     s = s.strip()
     if s.startswith(STANDARD_PREFIX):
-        s = s[len(STANDARD_PREFIX):]
+        s = s[len(STANDARD_PREFIX) :]
     return short_id(s)
 
 
 def select(rules, args):
+    """Return the rules that match every filter set in the parsed CLI args.
+
+    Applies --level, --exact-level, --section, --id and --keyword; unset
+    filters are ignored. Keywords match if any one occurs in the rule text.
+    """
     ids = {norm_id(i) for i in args.id} if args.id else None
     sections = {s.upper() for s in args.section} if args.section else None
     keywords = [k.lower() for k in args.keyword] if args.keyword else None
@@ -173,12 +205,15 @@ def select(rules, args):
 
 # --- output ----------------------------------------------------------------
 
+
 def cwe_text(r):
+    """Return 'CWE-<id>' for a rule, or an empty string if it has no CWE."""
     c = r.get("cwe")
     return f"CWE-{c['id']}" if c and c.get("id") else ""
 
 
 def fmt_table(rules, with_cwe):
+    """Print one 'id | level | rule text' line per rule, optionally with the CWE."""
     for r in rules:
         line = f"{std_id(r['id'])} | L{r['level']} | {r['rule']}"
         if with_cwe and cwe_text(r):
@@ -187,6 +222,7 @@ def fmt_table(rules, with_cwe):
 
 
 def fmt_ids(rules, with_cwe):
+    """Print rules grouped by section, each as id, level and text cut to 80 chars."""
     last = None
     for r in rules:
         if r["section"] != last:
@@ -201,6 +237,7 @@ def fmt_ids(rules, with_cwe):
 
 
 def fmt_sections(metas, rules):
+    """Print per chapter each section with matching rules and its L1/L2/L3 counts."""
     titles = {s["id"]: s.get("title", "") for m in metas for s in m.get("sections", [])}
     counts = {}
     for r in rules:
@@ -211,25 +248,39 @@ def fmt_sections(metas, rules):
             c = counts.get(s["id"])
             if not c:
                 continue
-            print(f"  {s['id']:<6} L1:{c[0]:<3} L2:{c[1]:<3} L3:{c[2]:<3} {titles.get(s['id'], '')}")
+            print(
+                f"  {s['id']:<6} L1:{c[0]:<3} L2:{c[1]:<3} L3:{c[2]:<3} {titles.get(s['id'], '')}"
+            )
 
 
 def fmt_json(rules):
+    """Print the full rule objects as a JSON array."""
     print(json.dumps(rules, indent=1, ensure_ascii=False))
 
 
 def main(argv=None):
-    p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0],
-                                formatter_class=argparse.RawDescriptionHelpFormatter,
-                                epilog=__doc__.split("Usage:", 1)[1])
+    """Parse the CLI arguments, filter the rules and print them.
+
+    Returns 0 on success, or 1 when no requirements match (except for the
+    sections format, which always succeeds).
+    """
+    p = argparse.ArgumentParser(
+        description=__doc__.split("\n\n")[0],
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=__doc__.split("Usage:", 1)[1],
+    )
     p.add_argument("--chapter", nargs="+", metavar="V<N>")
     p.add_argument("--level", type=int, choices=(1, 2, 3))
     p.add_argument("--exact-level", type=int, choices=(1, 2, 3))
     p.add_argument("--section", nargs="+", metavar="V<N>.<M>")
     p.add_argument("--id", nargs="+", metavar="ID")
     p.add_argument("--keyword", nargs="+", metavar="WORD")
-    p.add_argument("--format", choices=("table", "ids", "sections", "json"), default="table")
-    p.add_argument("--with-cwe", action="store_true", help="append the CWE id (table, ids)")
+    p.add_argument(
+        "--format", choices=("table", "ids", "sections", "json"), default="table"
+    )
+    p.add_argument(
+        "--with-cwe", action="store_true", help="append the CWE id (table, ids)"
+    )
     args = p.parse_args(argv)
 
     metas, rules = load(args.chapter)

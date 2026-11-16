@@ -35,26 +35,40 @@ Findings file (JSON; see ../assets/report-schema.json):
       "missing_evidence": ["No tests for session expiry; needed for 7.3.1"]
     }
 """
+
 import argparse
 import importlib.util
 import json
 import os
+import string
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 STATUSES = ("PASS", "FAIL", "PARTIAL", "N/A", "UNVERIFIED")
 CWE_URL = "https://cwe.mitre.org/data/definitions/{}.html"
 EXAMPLE = __doc__.split("Findings file (JSON; see ../assets/report-schema.json):", 1)[1]
+MARKDOWN_ESCAPES = {
+    ord(c): {"&": "&amp;", "<": "&lt;", ">": "&gt;"}.get(c, "\\" + c)
+    for c in string.punctuation
+}
 
 
 def _rules_module():
-    spec = importlib.util.spec_from_file_location("asvs_rules", os.path.join(HERE, "asvs-rules.py"))
+    """Import the sibling asvs-rules.py (its hyphenated name blocks a plain import)."""
+    spec = importlib.util.spec_from_file_location(
+        "asvs_rules", os.path.join(HERE, "asvs-rules.py")
+    )
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
 
 
 def load_rules():
+    """Load all ASVS rules.
+
+    Returns (mod, rules): the asvs-rules module, for its id helpers, and a
+    dict mapping short ids such as '6.2.1' to rule objects.
+    """
     mod = _rules_module()
     _, rules = mod.load()
     return mod, {mod.short_id(r["id"]): r for r in rules}
@@ -62,7 +76,15 @@ def load_rules():
 
 # --- validation ----------------------------------------------------------------
 
+
 def validate(doc, rules, norm_id):
+    """Check a findings document and return a list of problems (empty if valid).
+
+    Checks the top-level fields, then per finding: the id exists and is not
+    duplicated, the status is valid, PASS/FAIL/PARTIAL have evidence, N/A
+    has a reason, FAIL/PARTIAL have a remediation, and the rule's level is
+    not above the review's target level.
+    """
     problems = []
     if not isinstance(doc, dict):
         return ["findings file must be a JSON object"]
@@ -95,7 +117,9 @@ def validate(doc, rules, norm_id):
         seen.add(sid)
         status = f.get("status")
         if status not in STATUSES:
-            problems.append(f"{where} ({sid}): status must be one of {', '.join(STATUSES)}")
+            problems.append(
+                f"{where} ({sid}): status must be one of {', '.join(STATUSES)}"
+            )
         if status in ("PASS", "FAIL", "PARTIAL") and not f.get("evidence"):
             problems.append(f"{where} ({sid}): {status} needs evidence")
         if status == "N/A" and not (f.get("evidence") or f.get("reason")):
@@ -103,13 +127,17 @@ def validate(doc, rules, norm_id):
         if status in ("FAIL", "PARTIAL") and not f.get("remediation"):
             problems.append(f"{where} ({sid}): {status} needs a remediation")
         if doc.get("level") in (1, 2, 3) and rules[sid]["level"] > doc["level"]:
-            problems.append(f"{where} ({sid}): L{rules[sid]['level']} rule in an L{doc['level']} review")
+            problems.append(
+                f"{where} ({sid}): L{rules[sid]['level']} rule in an L{doc['level']} review"
+            )
     return problems
 
 
 # --- rendering -----------------------------------------------------------------
 
+
 def cwe_link(rule):
+    """Return a Markdown link to the rule's MITRE CWE page, or '' if it has no CWE."""
     c = rule.get("cwe")
     if not c or not c.get("id"):
         return ""
@@ -117,67 +145,118 @@ def cwe_link(rule):
 
 
 def expand(doc, rules, norm_id, std_id):
+    """Merge each finding with its rule data and return them sorted by id.
+
+    Adds the standard id, chapter, section, level, rule text and CWE
+    details to the agent's status, evidence, why and remediation. Expects
+    a document that already passed `validate`.
+    """
     out = []
     for f in doc["findings"]:
         sid = norm_id(str(f["id"]))
         r = rules[sid]
-        out.append({
-            "id": std_id(r["id"]),
-            "chapter": r["chapter"],
-            "section": r["section"],
-            "level": r["level"],
-            "status": f["status"],
-            "evidence": f.get("evidence") or f.get("reason") or "",
-            "remediation": f.get("remediation", ""),
-            "rule": r["rule"],
-            "cwe": f"CWE-{r['cwe']['id']}" if r.get("cwe") and r["cwe"].get("id") else "",
-            "cwe_link": cwe_link(r),
-            "cwe_name": (r.get("cwe") or {}).get("name", ""),
-            "cwe_note": (r.get("cwe") or {}).get("note", ""),
-            "why": f.get("why", ""),
-        })
+        out.append(
+            {
+                "id": std_id(r["id"]),
+                "chapter": r["chapter"],
+                "section": r["section"],
+                "level": r["level"],
+                "status": f["status"],
+                "evidence": f.get("evidence") or f.get("reason") or "",
+                "remediation": f.get("remediation", ""),
+                "rule": r["rule"],
+                "cwe": (
+                    f"CWE-{r['cwe']['id']}"
+                    if r.get("cwe") and r["cwe"].get("id")
+                    else ""
+                ),
+                "cwe_link": cwe_link(r),
+                "cwe_name": (r.get("cwe") or {}).get("name", ""),
+                "cwe_note": (r.get("cwe") or {}).get("note", ""),
+                "why": f.get("why", ""),
+            }
+        )
     out.sort(key=lambda x: [int(p) for p in x["id"].split("-", 1)[1].split(".")])
     return out
 
 
 def counts(expanded):
-    c = {s: 0 for s in STATUSES}
+    """Return the number of findings per status, including zero counts."""
+    c = dict.fromkeys(STATUSES, 0)
     for f in expanded:
         c[f["status"]] += 1
     return c
 
 
+def escape_markdown(text):
+    """Render untrusted text literally, without Markdown, HTML or line breaks."""
+    return " ".join(text.splitlines()).translate(MARKDOWN_ESCAPES)
+
+
 def render_markdown(doc, expanded):
-    lines = [f"💂🏼 ASVS 5.0.0 verification: {doc['scope']}, target L{doc['level']}"]
+    """Render the Markdown report.
+
+    Includes the header with scope, inventory and chapters, a table with one
+    row per finding, the summary counts, top risks, a Findings entry per
+    FAIL/PARTIAL (ordered by level, then id) and any missing evidence.
+    """
+    lines = [
+        f"💂🏼 ASVS 5.0.0 verification: {escape_markdown(doc['scope'])}, target L{doc['level']}"
+    ]
     if doc.get("inventory"):
-        lines.append("Inventory: " + ", ".join(doc["inventory"]))
-    chapters = doc.get("chapters") or sorted({f["chapter"] for f in expanded}, key=lambda c: int(c[1:]))
+        lines.append("Inventory: " + ", ".join(map(escape_markdown, doc["inventory"])))
+    chapters = doc.get("chapters") or sorted(
+        {f["chapter"] for f in expanded}, key=lambda c: int(c[1:])
+    )
     skipped = doc.get("skipped_chapters") or {}
-    line = "Chapters: " + ", ".join(chapters)
+    line = "Chapters: " + ", ".join(map(escape_markdown, chapters))
     if skipped:
-        line += " (skipped: " + "; ".join(f"{k} {v}" for k, v in skipped.items()) + ")"
+        line += " (skipped: " + "; ".join(
+            f"{escape_markdown(k)} {escape_markdown(v)}" for k, v in skipped.items()
+        ) + ")"
     lines.append(line)
     na = doc.get("sections_na") or {}
     if na:
-        lines.append("Sections N/A: " + ", ".join(f"{k} ({v})" for k, v in na.items()))
-    lines += ["", "| Requirement | L | Status | Evidence / finding | CWE |", "|---|---|---|---|---|"]
+        lines.append(
+            "Sections N/A: "
+            + ", ".join(
+                f"{escape_markdown(k)} ({escape_markdown(v)})" for k, v in na.items()
+            )
+        )
+    lines += [
+        "",
+        "| Requirement | L | Status | Evidence / finding | CWE |",
+        "|---|---|---|---|---|",
+    ]
     for f in expanded:
-        ev = f["evidence"].replace("|", "\\|").replace("\n", " ")
-        lines.append(f"| {f['id']} | {f['level']} | {f['status']} | {ev} | {f['cwe_link']} |")
+        ev = escape_markdown(f["evidence"])
+        lines.append(
+            f"| {f['id']} | {f['level']} | {f['status']} | {ev} | {f['cwe_link']} |"
+        )
     c = counts(expanded)
     lines += ["", "Summary: " + ", ".join(f"{c[s]} {s}" for s in STATUSES)]
     risks = doc.get("top_risks") or []
     if risks:
-        lines += ["", "Top risks"] + [f"{i}. {r}" for i, r in enumerate(risks, 1)]
-    fixes = sorted((f for f in expanded if f["status"] in ("FAIL", "PARTIAL")),
-                   key=lambda f: (f["level"], [int(p) for p in f["id"].split("-", 1)[1].split(".")]))
+        lines += ["", "Top risks"] + [
+            f"{i}. {escape_markdown(r)}" for i, r in enumerate(risks, 1)
+        ]
+    fixes = sorted(
+        (f for f in expanded if f["status"] in ("FAIL", "PARTIAL")),
+        key=lambda f: (
+            f["level"],
+            [int(p) for p in f["id"].split("-", 1)[1].split(".")],
+        ),
+    )
     if fixes:
         lines += ["", "Findings"]
         for f in fixes:
-            lines += ["", f"### {f['id']} {f['status']} (L{f['level']})",
-                      f"Requirement: {f['rule']}",
-                      f"Found: {f['evidence']}"]
-            why = f["why"]
+            lines += [
+                "",
+                f"### {f['id']} {f['status']} (L{f['level']})",
+                f"Requirement: {f['rule']}",
+                f"Found: {escape_markdown(f['evidence'])}",
+            ]
+            why = escape_markdown(f["why"])
             if f["cwe"]:
                 weakness = f"{f['cwe_link']} {f['cwe_name']}".strip()
                 if f["cwe_note"]:
@@ -185,22 +264,33 @@ def render_markdown(doc, expanded):
                 lines.append(f"Why it matters: {weakness}" + (f" {why}" if why else ""))
             elif why:
                 lines.append(f"Why it matters: {why}")
-            lines.append(f"Fix: {f['remediation']}")
+            lines.append(f"Fix: {escape_markdown(f['remediation'])}")
     missing = doc.get("missing_evidence") or []
     if missing:
-        lines += ["", "Missing evidence"] + [f"- {m}" for m in missing]
+        lines += ["", "Missing evidence"] + [f"- {escape_markdown(m)}" for m in missing]
     return "\n".join(lines) + "\n"
 
 
 def main(argv=None):
-    p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0],
-                                formatter_class=argparse.RawDescriptionHelpFormatter,
-                                epilog=__doc__.split("Usage:", 1)[1])
+    """Parse the CLI arguments, validate the findings file and write the report.
+
+    Returns 0 on success, or 1 when the file is not valid JSON or fails
+    validation.
+    """
+    p = argparse.ArgumentParser(
+        description=__doc__.split("\n\n")[0],
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=__doc__.split("Usage:", 1)[1],
+    )
     p.add_argument("findings", nargs="?", help="findings JSON file")
     p.add_argument("-o", "--output", help="write the report here instead of stdout")
     p.add_argument("--format", choices=("markdown", "json"), default="markdown")
-    p.add_argument("--validate", action="store_true", help="only check the findings file")
-    p.add_argument("--example", action="store_true", help="print an example findings file")
+    p.add_argument(
+        "--validate", action="store_true", help="only check the findings file"
+    )
+    p.add_argument(
+        "--example", action="store_true", help="print an example findings file"
+    )
     args = p.parse_args(argv)
 
     if args.example:
