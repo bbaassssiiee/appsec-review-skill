@@ -61,23 +61,33 @@ def test_example_is_valid(tmp_path):
 def test_markdown_report(findings):
     code, out, err = run(findings(good()))
     assert code == 0, err
-    assert out.startswith("💂🏼 ASVS 5.0.0 verification: src/auth, target L2\n")
-    assert "Inventory: web UI + REST API, password login" in out
+    assert out.startswith("💂🏼 ASVS 5.0.0 verification: src\\/auth, target L2\n")
+    assert r"Inventory: web UI \+ REST API, password login" in out
     assert "Chapters: V6, V7 (skipped: V17 no WebRTC)" in out
-    assert "Sections N/A: V6.6 (no out-of-band authentication)" in out
+    assert r"Sections N/A: V6\.6 (no out\-of\-band authentication)" in out
     # rows are sorted by id and ids are in standard notation, with level and CWE filled in
     rows = [line for line in out.splitlines() if line.startswith("| v5.0.0-")]
     assert [r.split(" | ")[0] for r in rows] == ["| v5.0.0-6.1.1", "| v5.0.0-6.2.1", "| v5.0.0-6.4.1", "| v5.0.0-7.2.1"]
-    assert "| v5.0.0-6.2.1 | 1 | FAIL | `auth/password.py:42` minimum length is 6 | [CWE-521](https://cwe.mitre.org/data/definitions/521.html) |" in out
+    assert r"| v5.0.0-6.2.1 | 1 | FAIL | \`auth\/password\.py\:42\` minimum length is 6 | [CWE-521](https://cwe.mitre.org/data/definitions/521.html) |" in out
     assert "Summary: 1 PASS, 1 FAIL, 0 PARTIAL, 1 N/A, 1 UNVERIFIED" in out
     assert "Findings\n\n### v5.0.0-6.2.1 FAIL (L1)\n" in out
     assert "Requirement: User set passwords are at least 8 characters" in out
-    assert "Found: `auth/password.py:42` minimum length is 6" in out
+    assert r"Found: \`auth\/password\.py\:42\` minimum length is 6" in out
     assert "Why it matters: [CWE-521](https://cwe.mitre.org/data/definitions/521.html) Weak Password Requirements: An attacker could easily guess" in out
-    assert "Fix: Raise the minimum to 8." in out
+    assert r"Fix: Raise the minimum to 8\." in out
     assert "### v5.0.0-7.2.1" not in out  # PASS gets no Findings entry
-    assert "Top risks\n1. Short passwords accepted (6.2.1)" in out
+    assert "Top risks\n1. Short passwords accepted \\(6\\.2\\.1\\)" in out
     assert "Missing evidence\n- Authentication documentation" in out
+
+
+def test_untrusted_markdown_is_rendered_literally(findings):
+    doc = good()
+    doc["findings"][0]["evidence"] = "<img src=x> | [link](https://example.com)\n### injected"
+    code, out, err = run(findings(doc))
+    assert code == 0, err
+    literal = r"&lt;img src\=x&gt; \| \[link\]\(https\:\/\/example\.com\) \#\#\# injected"
+    assert f"| {literal} | [CWE-521]" in out
+    assert f"Found: {literal}" in out
 
 
 def test_writes_output_file(findings, tmp_path):

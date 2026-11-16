@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Distill references/0x1*-V*.md / 0x2*-V*.md (OWASP ASVS 5.0.0) into rules/asvs-v<N>-rules.yml.
 set -euo pipefail
 
