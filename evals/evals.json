@@ -8,11 +8,10 @@
       "expected_output": "A short list of the applicable V9 (and V10.3) requirement ids with one-line summaries, no full report table, no whole chapter dumped into the answer.",
       "files": [],
       "assertions": [
-        {"text": "Every message starts with the guard emoji", "check": "all assistant messages start with 💂🏼"},
         {"text": "Requirement ids use the v5.0.0-x.y.z notation", "check": "ids like v5.0.0-9.1.1 appear; no ASVS-V9-9.1.1 ids"},
         {"text": "Only the token-related requirements are listed", "check": "ids are from V9 and V10.3; no V6 password rules"},
-        {"text": "No L3 rules at L2", "check": "every listed id has level <= 2 per scripts/asvs-rules.py"},
-        {"text": "Rules were fetched with the script, not by reading a rules file", "check": "transcript shows asvs-rules.py --keyword or --section/--chapter; no Read of rules/asvs-v9-rules.yml"}
+        {"text": "No L3 rules at L2", "check": "every listed id has level <= 2 in rules/asvs-v<N>-rules.yml"},
+        {"text": "Rules were found by searching, not by loading unrelated chapters", "check": "transcript shows a keyword or section search over rules/, or a read of rules/asvs-v9-rules.yml and rules/asvs-v10-rules.yml only; no other chapter read whole"}
       ]
     },
     {
@@ -22,12 +21,11 @@
       "expected_output": "Findings based on assets/design-review-checklist.md: PASS where the design answers a question (e.g. 7.1.1 idle timeout stated but absolute lifetime missing → PARTIAL or UNVERIFIED), UNVERIFIED with the open question for undocumented items (logging 16.1.1, data classification 14.1.1), N/A for absent features, and remediation that tells the author what to add to the document.",
       "files": [],
       "assertions": [
-        {"text": "Every message starts with the guard emoji", "check": "all assistant messages start with 💂🏼"},
         {"text": "Design checklist was used", "check": "transcript reads assets/design-review-checklist.md"},
         {"text": "Open design questions are UNVERIFIED, not FAIL", "check": "14.1.1 and 16.1.1 are UNVERIFIED (or missing evidence lists them); neither is FAIL"},
         {"text": "Session lifetime gap is found", "check": "7.1.1 is PARTIAL or UNVERIFIED and the finding mentions the absolute lifetime"},
         {"text": "Every FAIL/PARTIAL has a remediation", "check": "report contains a Findings block with Requirement/Found/Why it matters/Fix per FAIL/PARTIAL and nothing beyond the table row for a PASS"},
-        {"text": "Report is rendered from a findings file", "check": "transcript shows asvs-report.py run on a findings JSON, or an explicit note that the script could not run"}
+        {"text": "No script execution is attempted", "check": "transcript shows no attempt to run asvs-rules.py or asvs-report.py"}
       ]
     },
     {
@@ -37,13 +35,12 @@
       "expected_output": "Inventory line, chapters V6 and V7 (V8 if authorization code is adjacent), sections N/A for absent authenticators, a findings table with path:line evidence, computed summary, remediation per FAIL/PARTIAL. Needs a target repository: run against any codebase with a login flow.",
       "files": [],
       "assertions": [
-        {"text": "Every message starts with the guard emoji", "check": "all assistant messages start with 💂🏼"},
-        {"text": "Inventory precedes rule loading", "check": "transcript shows searches (grep/glob/manifest reads) before the first asvs-rules.py call that returns rule text"},
-        {"text": "Triage happened per section", "check": "transcript shows asvs-rules.py --format sections, and the report has a Sections N/A line"},
-        {"text": "Whole chapters were not loaded", "check": "no asvs-rules.py --chapter V6 without --format sections/ids, and no Read of rules/*.yml"},
+        {"text": "Inventory precedes rule loading", "check": "transcript shows searches of the target repository (grep/glob/manifest reads) before the first search of rules/ that returns rule text"},
+        {"text": "Triage happened per section", "check": "transcript reads the meta block of the routed rules files before loading rule text, and the report has a Sections N/A line"},
+        {"text": "Whole chapters were not loaded", "check": "no full Read of rules/asvs-v6-rules.yml; rule text comes from section or id searches with context"},
         {"text": "Every PASS has concrete evidence", "check": "each PASS row cites a path:line, test name or config key"},
-        {"text": "Summary counts match the table", "check": "counts in the Summary line equal the row counts per status (asvs-report.py guarantees this when used)"},
-        {"text": "Findings file validates", "check": "scripts/asvs-report.py <findings> --validate exits 0"}
+        {"text": "Summary counts match the table", "check": "counts in the Summary line equal the row counts per status"},
+        {"text": "Rule data comes from the rules files", "check": "every id in the table exists in rules/, and its level and CWE match the rule entry"}
       ]
     },
     {
@@ -53,7 +50,6 @@
       "expected_output": "Review scoped to the diff: V6.4 (recovery) and the relevant V6.2 and V6.3 rules; a note that the rest of authentication is out of scope rather than UNVERIFIED; findings on token lifetime, single use, rate limiting and notification. Needs a target repository with such a branch.",
       "files": [],
       "assertions": [
-        {"text": "Every message starts with the guard emoji", "check": "all assistant messages start with 💂🏼"},
         {"text": "Scope is the diff", "check": "report scope names the branch/PR and states that unchanged code is out of scope"},
         {"text": "Recovery section is covered", "check": "findings include V6.4 ids (e.g. 6.4.1, 6.4.2)"},
         {"text": "Unrelated sections are not listed rule by rule", "check": "no V6.5/V6.6/V6.7/V6.8 rows in the table; they appear only in Sections N/A or not at all"},

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/bbaassssiiee/appsec-review-skill/assets/report-schema.json",
   "title": "ASVS verification findings",
-  "description": "Input for scripts/asvs-report.py. Record only decisions; the script adds level, rule text and CWE from the rules files and computes the summary.",
+  "description": "Machine-readable form of an ASVS verification report, for CI or tooling. Records the reviewer's decisions; level, rule text and CWE for each id are in the rules files.",
   "type": "object",
   "required": ["scope", "level", "findings"],
   "additionalProperties": false,
@@ -25,7 +25,7 @@
           "status": {"type": "string", "enum": ["PASS", "FAIL", "PARTIAL", "N/A", "UNVERIFIED"]},
           "evidence": {"type": "string", "description": "Concrete location (`path:line`), test name or config key, and what it shows. Required for PASS, FAIL and PARTIAL."},
           "reason": {"type": "string", "description": "For N/A: why the requirement does not apply. For UNVERIFIED: what evidence is missing."},
-          "why": {"type": "string", "description": "For FAIL and PARTIAL: what an attacker gains from this gap in this application, in one or two sentences. The renderer prefixes the CWE name and its typical consequence; use this for the application-specific part."},
+          "why": {"type": "string", "description": "For FAIL and PARTIAL: what an attacker gains from this gap in this application, in one or two sentences. The CWE name and its typical consequence are in the rules file; use this for the application-specific part."},
           "remediation": {"type": "string", "description": "What to change, where. Required for FAIL and PARTIAL."}
         }
       }

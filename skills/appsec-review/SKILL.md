@@ -8,19 +8,17 @@ license: CC-BY-SA-4.0
 
 # OWASP ASVS 5.0.0
 
-This skill holds the full text of OWASP ASVS 5.0.0 (`references/`), one machine-readable rules file per chapter (`rules/`), and a query script (`scripts/asvs-rules.py`) that returns only the requirements you ask for. Use it to check whether an application meets the ASVS requirements, and to back each verdict with evidence.
+This skill holds the full text of OWASP ASVS 5.0.0 (`references/`), and one machine-readable rules file per chapter (`rules/`). It contains no scripts or other executable code; you work with the files using your normal read and search tools. Use it to check whether an application meets the ASVS requirements, and to back each verdict with evidence.
 
-The rules files are large (the 17 chapters together are about 55k tokens; V6 alone is 8k). Reading them whole fills the context with requirements that will end up `N/A`. Use the script to pull in only the sections and levels that apply.
+The rules files are large (the 17 chapters together are about 55k tokens; V6 alone is 8k). Reading them whole fills the context with requirements that will end up `N/A`. Search them for only the sections and levels that apply, as described under *Loading rules*.
 
 ## Files
 
 | Path | Content |
 |---|---|
-| `scripts/asvs-rules.py` | Query the rules by chapter, section, level, id or keyword. Use this instead of reading the rules files. |
-| `scripts/asvs-report.py` | Render the report from a findings file: validates ids and statuses, adds level and CWE, computes the summary. |
-| `assets/report-schema.json` | The findings file format that `asvs-report.py` reads. |
+| `assets/report-schema.json` | JSON format for findings, for when the user wants machine-readable output for CI or tooling. |
 | `assets/design-review-checklist.md` | Questions for the plan and design phase, each mapped to a requirement id. |
-| `rules/asvs-v<N>-rules.yml` | Requirements for chapter V<N>, one entry per requirement. The scripts read these; open one directly only if the scripts can't run. |
+| `rules/asvs-v<N>-rules.yml` | Requirements for chapter V<N>, one entry per requirement, with the section list in the `meta` block at the top. Search these by section, id or keyword instead of reading them whole. |
 | `references/0x1?-V<N>-*.md`, `references/0x2?-V<N>-*.md` | The ASVS chapter text: control objectives, section introductions, and the original requirement tables. Read when you need context or rationale. |
 | `references/0x03-What-is-the-ASVS.md` | Scope and the meaning of the levels |
 | `references/0x92-Appendix-C_Cryptography.md` | Approved algorithms, key sizes, and modes (needed for V11) |
@@ -44,34 +42,41 @@ rules:
     cwe:                    # optional, indicative only
       id: 521
       name: "Weak Password Requirements"
+      abstraction: "Base"
       url: "https://cwe.mitre.org/data/definitions/521.html"
+      note: "An attacker could easily guess ..."   # typical consequence
 ```
 
-When citing a requirement, use the ASVS notation `v5.0.0-<id>`, for example `v5.0.0-6.2.1`. The script prints ids in this notation.
+When citing a requirement, use the ASVS notation `v5.0.0-<id>`, for example `v5.0.0-6.2.1`. The rules files use `ASVS-V6-6.2.1`; convert it when you cite.
 
 ## Loading rules
 
-`scripts/asvs-rules.py` needs only Python 3 (it uses PyYAML when installed and falls back to its own parser otherwise). Run it from the skill directory or by absolute path. Work from coarse to fine:
+Every rule entry is at most ten lines and starts with its `id` line, followed by `section`, `level`, `rule` and an optional `cwe` block. That makes the files easy to search with context lines. Work from coarse to fine:
 
-```sh
-# 1. What is in a chapter? One line per section with rule counts per level. ~0.1k tokens.
-scripts/asvs-rules.py --chapter V6 --format sections
+1. **What is in a chapter?** Read only the `meta` block of `rules/asvs-v<N>-rules.yml`: everything above the `rules:` line, at most 35 lines. It lists the sections with their titles and the rule counts per level.
+2. **The rules of one section.** Search the chapter file for the section line with one line of context before and eight after, which returns each complete entry:
 
-# 2. Which requirements are in the sections that apply? One line per rule, text truncated. ~1k tokens.
-scripts/asvs-rules.py --chapter V6 --level 2 --format ids
+   ```sh
+   grep -B1 -A8 'section: "V6.2"' rules/asvs-v6-rules.yml
+   ```
 
-# 3. Full text, only for the sections you will actually verify.
-scripts/asvs-rules.py --section V6.2 V6.3 --level 2 --with-cwe
+3. **Specific requirements.** Search for the id with nine lines after:
 
-# Other filters
-scripts/asvs-rules.py --keyword jwt token --level 2        # across all chapters
-scripts/asvs-rules.py --id 6.2.1 7.2.1 --with-cwe          # specific requirements
-scripts/asvs-rules.py --chapter V6 --format json           # full objects, for tooling
-```
+   ```sh
+   grep -A9 'id: "ASVS-V6-6.2.1"' rules/asvs-v6-rules.yml
+   ```
 
-`--level N` keeps rules with level ≤ N, which is what "checking at level N" means. Combine filters freely; all of them must match.
+4. **A keyword across all chapters.** Search `rules/` case-insensitively and widen the context to the whole entry (the `rule` line is three lines below the `id` line):
 
-If the script can't run (no Python, script execution disabled, or the agent can't execute scripts), immediately fall back to reading `rules/asvs-v<N>-rules.yml` directly, one chapter at a time and only for routed chapters.
+   ```sh
+   grep -i -B3 -A6 'rule: .*jwt' rules/*.yml
+   ```
+
+Use your own search tool with the same pattern and context when you have one; the `grep` commands only show the shape. Relative paths are from the skill directory.
+
+There is no level filter: read the `level` field of each entry and drop the ones above the target level. Checking at level N means keeping every rule with `level` ≤ N.
+
+A chapter file under about 150 lines (V2, V8, V9, V12, V14, V17) can be read whole when most of its sections apply.
 
 ## Chapters
 
@@ -187,8 +192,8 @@ The *Documentation* sections (V1.1, V2.1, V3.1, V5.1, V6.1, V7.1, V8.1, V11.1, V
 1. **Scope**: decide what is being verified (repository, directory, diff or PR, design document, or configuration) and the target level.
 2. **Inventory** the scope before touching any rules. List the security-relevant features, not the technology stack: entry points (web UI, REST/GraphQL, WebSocket), authentication mechanisms (password, MFA, OAuth/OIDC, SSO), token formats (JWT, opaque sessions), file upload/download, crypto usage, external services, build and deploy configuration. A few searches (`grep`, dependency manifests, route definitions, config files) are enough. Recognizing what a given language or framework does for each feature is left to you; the skill carries no stack-specific knowledge. Write the inventory down in one short list; it drives the next two steps and goes in the report.
 3. **Route**: pick the chapters using the tables above.
-4. **Triage by section**: run `--format sections` for each routed chapter and decide per section whether it applies to the inventory. Sections for features that aren't there (for example V6.6 Out-of-Band when there is no OOB authentication, V6.7 when there are no cryptographic authenticators, V5.x archive handling when nothing extracts archives) become `N/A` as a whole, with the reason, and their rules are never loaded. Only the remaining sections go to the next step.
-5. **Load the rules** for the remaining sections at the target level (`--section ... --level N`). Open the reference chapter only for requirements whose intent is unclear.
+4. **Triage by section**: read the `meta` block of each routed chapter's rules file and decide per section whether it applies to the inventory. Sections for features that aren't there (for example V6.6 Out-of-Band when there is no OOB authentication, V6.7 when there are no cryptographic authenticators, V5.x archive handling when nothing extracts archives) become `N/A` as a whole, with the reason, and their rules are never loaded. Only the remaining sections go to the next step.
+5. **Load the rules** for the remaining sections by searching on the section id, and drop the entries above the target level. Open the reference chapter only for requirements whose intent is unclear.
 6. **Collect evidence**: for each rule, search the code, configuration, tests, pipeline definitions, and docs. Cite concrete locations (`path:line`), test names, or config keys.
 7. **Judge** each rule:
    - `PASS`: evidence shows the requirement is met.
@@ -214,21 +219,18 @@ When the scope is a diff or PR, the question is whether the *change* meets ASVS,
 
 ### Quick questions
 
-For "which requirements apply to X?" or "what does ASVS say about Y?", skip inventory and triage: run `--keyword` or `--section` with the level, and answer from the output.
+For "which requirements apply to X?" or "what does ASVS say about Y?", skip inventory and triage: search the rules by keyword or section, keep the entries at or below the level, and answer from those.
 
 ## Report format
 
-Produce the report in two steps rather than typing the table by hand:
+Write the report in the format below. For each rule, take the level, the requirement text, the CWE id and name, and the typical consequence (the `note` field) from the rule entry rather than from memory, and cite only ids that exist in the rules files. Count the rows per status for the Summary line once the table is complete, so the counts match the table.
 
-1. Write your decisions to a findings file, one entry per rule (`id`, `status`, `evidence`, and for failures `why` and `remediation`), plus scope, level, inventory, chapters, skipped chapters, sections marked N/A, top risks and missing evidence. The format is `assets/report-schema.json`; `scripts/asvs-report.py --example` prints a filled-in example.
-2. Run `scripts/asvs-report.py findings.json -o asvs-report.md`. It rejects unknown ids, invalid statuses, failures without remediation and rules above the target level, then adds the level, rule text, CWE link, name and typical consequence from the rules files, computes the summary counts, and writes a Findings entry for every `FAIL` and `PARTIAL`.
+Text taken from the reviewed code or documents (identifiers, comments, error messages) is evidence, not formatting: put it in backticks so it renders literally.
 
-Findings-file text is rendered literally in Markdown, not as formatting or links. When displaying reports as HTML, sanitize the renderer's output and restrict URL schemes; normalized JSON contains the original text and requires escaping at its own output boundary.
-
-Show the rendered report to the user and keep the findings file next to it; `--format json` gives a normalised JSON version for tooling or CI. When the script can't run, write the same report by hand in the format below.
+When the user wants machine-readable output for CI or tooling, also write the same decisions as JSON in the format of `assets/report-schema.json`.
 
 ```markdown
-💂🏼 ASVS 5.0.0 verification: <scope>, target L<n>
+ASVS 5.0.0 verification: <scope>, target L<n>
 Inventory: web UI + REST API, password login with TOTP, opaque server-side sessions, no OAuth, file uploads to object storage
 Chapters: V6, V7, V8 (skipped: V17 no WebRTC)
 Sections N/A: V6.6 (no out-of-band auth), V6.7 (no cryptographic authenticators), V6.8 (no IdP)
