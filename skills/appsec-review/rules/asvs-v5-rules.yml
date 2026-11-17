@@ -10,7 +10,7 @@ meta:
   per_level: {L1: 4, L2: 5, L3: 4}
   cwe:
     mapped: 11
-    mapping: "scripts/asvs-5.0.0-cwe-mapping.yml (derived from OWASP ASVS 5.0.be, indicative only)"
+    mapping: "derived from OWASP ASVS 5.0.be, indicative only"
     catalogs:
       - "cwe.xml: CWE 4.20 (2026-04-30), VIEW LIST: CWE-699: Software Development"
       - "cwec_v4.20.xml: CWE 4.20 (2026-04-30), CWE"
