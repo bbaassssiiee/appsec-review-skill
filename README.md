@@ -112,13 +112,6 @@ skills/appsec-review/   the skill (this is what gets installed)
   rules/                asvs-v<N>-rules.yml, one per chapter
   references/           ASVS 5.0.0 chapters and appendices (Markdown)
 tests/                  pytest suite for the skill scripts
-scripts/                maintainer tooling, not part of the installed skill
-  trigger_eval/         description trigger-accuracy loop (vendored from skill-creator, Apache 2.0)
-  generate-asvs-rules.sh  rebuild rules/ from references/ (runs the CWE enrichment)
-  enrich-rules-with-cwe.py  add CWE fields to the rules
-  asvs-5.0.0-cwe-mapping.yml  ASVS id → CWE id mapping
-  asvs.sh               consistency check (rules vs. references)
-  check-skill.py        SKILL.md format check (name, description, referenced files)
 .claude-plugin/         Claude Code plugin manifest (plugin.json)
 .github/workflows/      CI: runs pre-commit on every push and pull request
 ```
@@ -130,21 +123,13 @@ GitHub Actions (`.github/workflows/validate.yml`):
 
 ```sh
 pre-commit install                  # run the checks on every commit
-pre-commit run --all-files          # SKILL.md format, rules vs. references, YAML/JSON, whitespace
+pre-commit run --all-files          # YAML/JSON, shebangs, whitespace
 ```
 
-Individual checks and the rules generator:
+The test suite covers the skill scripts and the eval files:
 
 ```sh
-scripts/check-skill.py              # SKILL.md frontmatter and referenced files
-scripts/asvs.sh verify              # every requirement in references/ has a rule
 python3 -m pytest -q tests          # the skill scripts, with and without PyYAML
-scripts/asvs.sh stats               # rule counts per chapter
-
-# Rebuilding the rules needs the CWE-699 XML view from
-# https://cwe.mitre.org/data/downloads.html saved as scripts/cwe.xml (or set CWE_XML).
-scripts/generate-asvs-rules.sh
-CWE_CATALOG=/path/to/cwec_v4.20.xml scripts/generate-asvs-rules.sh   # also resolve CWEs outside the view
 ```
 
 ## Testing the skill itself
@@ -158,44 +143,15 @@ CWE_CATALOG=/path/to/cwec_v4.20.xml scripts/generate-asvs-rules.sh   # also reso
   applicable sections loaded, Sections N/A line, remediation per failure, findings file
   that validates). Evals 3 and 4 need a repository with a login flow to run against.
 
-Measuring triggering needs the `claude` CLI (Claude Code) and nothing else: the loop
-from Anthropic's skill-creator is vendored in `scripts/trigger_eval/` (Apache 2.0, see
-the LICENSE.txt there). It scores the current description by running each query through
-`claude -p` several times, asks Claude to propose a better description from the misses,
-re-scores on a held-out split to avoid overfitting, and keeps the best one.
+A single prompt can be checked with the `claude` CLI (Claude Code):
 
 ```sh
-# one-off check of a single prompt
 claude -p "Is ons wachtwoordbeleid streng genoeg? Minimaal 6 tekens, geen MFA." --verbose | grep -i appsec-review
-
-# the full loop, from the repository root
-python3 -m scripts.trigger_eval.run_loop \
-  --eval-set evals/trigger-evals.json \
-  --skill-path skills/appsec-review \
-  --model claude-sonnet-4-5 \
-  --max-iterations 5 --results-dir evals/results --verbose
-
-# score the current description only, no improvement step
-python3 -m scripts.trigger_eval.run_eval \
-  --eval-set evals/trigger-evals.json --skill-path skills/appsec-review --verbose
 ```
 
-`--model` is the model used to propose new descriptions; the triggering test itself uses
-your configured Claude Code model unless you pass `--model` to `run_eval`. Each query runs
-in its own throwaway directory that holds only the skill's command file, so the model sees
-the skill the way an end user would and not this repository's source; pass `--in-project`
-to run inside the repository instead (that writes temporary command files under
-`.claude/commands/`, which is git-ignored, as is `evals/results/`). The `claude -p` calls
-load project-level settings only and no MCP servers, so the skills and connectors installed
-on your machine do not compete with the description under test; pass `--user-settings` to
-measure triggering in your real environment instead. With `--verbose` every finished run
-prints one line (triggered or not, what the first tool call was, seconds taken), and a
-failed query lists which tool or skill the first call went to instead. Each query costs a `claude -p` call of 10 to 25 seconds, so a full run with the
-default 3 runs per query is about 70 calls per iteration; Ctrl-C stops the run and kills
-the `claude` subprocesses within a second.
-
-When it finishes, paste `best_description` from the JSON output into `SKILL.md` and run
-`pytest` so the trigger words stay covered.
+To score or tune the description against the whole set, feed `trigger-evals.json` to the
+trigger-eval loop in Anthropic's skill-creator. After changing the description in
+`SKILL.md`, run `pytest` so the trigger words stay covered.
 
 ## License
 
