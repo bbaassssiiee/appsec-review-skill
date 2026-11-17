@@ -1,6 +1,6 @@
 ---
 name: appsec-review
-description: Review code, PRs, designs, and configuration against OWASP ASVS 5.0.0 (L1-L3). Use for ASVS/OWASP/CWE or application-security questions, feature-specific requirement lookups (for example login, sessions, upload, API, tokens, OAuth), and security/compliance reviews before merge or audit. Route to relevant ASVS chapters, load only applicable sections, evaluate evidence, and report PASS/FAIL/PARTIAL/N/A/UNVERIFIED with risk and remediation.
+description: Review code, PRs, designs, and configuration against OWASP ASVS 5.0.0 (L1-L3). Use for ASVS/OWASP/CWE, appsec, or application security questions, feature-specific requirement lookups (for example login, sessions, upload, API, tokens, OAuth), and security/compliance reviews before merge or audit. Route to relevant ASVS chapters, load only applicable sections, evaluate evidence, and report PASS/FAIL/PARTIAL/N/A/UNVERIFIED with risk and remediation.
 version: 5.0.0
 author: bas.meijer
 license: CC-BY-SA-4.0
