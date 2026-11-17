@@ -1,5 +1,17 @@
 # appsec-review-skill
 
+**What this skill does, for disclosure:** `skills/appsec-review/` runs two local
+Python 3 scripts, `scripts/asvs-rules.py` and `scripts/asvs-report.py`, which only
+read and query the bundled local files (`rules/*.yml`, `references/*.md`,
+`assets/report-schema.json`) and write a report file you choose; neither script
+makes any network request, calls any external API or tool, or executes any other
+program. The only URL involved is a static text string,
+`https://cwe.mitre.org/data/definitions/<ID>.html`, written into report output as a
+human-readable Markdown link to MITRE's CWE pages; it is never fetched by the
+scripts. The agent using this skill may still use its own normal tools (reading
+your repository files, running `grep`-style searches) to gather evidence, but the
+skill itself issues no outbound requests and bundles no other executable code.
+
 An [Agent Skill](https://agentskills.io) for checking applications against the
 [OWASP Application Security Verification Standard (ASVS) 5.0.0](https://owasp.org/www-project-application-security-verification-standard/).
 
