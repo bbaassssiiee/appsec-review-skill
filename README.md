@@ -50,11 +50,12 @@ all three agents.
 
 ### Claude Code plugin
 
-This repository is also a Claude Code plugin marketplace:
+This repository is also a Claude Code plugin, published through the
+[`bas-ai-skills`](https://github.com/bbaassssiiee/bas-ai-skills) marketplace:
 
 ```text
-/plugin marketplace add bbaassssiiee/appsec-review-skill
-/plugin install appsec-review@appsec-review-skill
+/plugin marketplace add bbaassssiiee/bas-ai-skills
+/plugin install appsec-review@bas-ai-skills
 ```
 
 ## Usage
@@ -118,7 +119,7 @@ scripts/                maintainer tooling, not part of the installed skill
   asvs-5.0.0-cwe-mapping.yml  ASVS id → CWE id mapping
   asvs.sh               consistency check (rules vs. references)
   check-skill.py        SKILL.md format check (name, description, referenced files)
-.claude-plugin/         Claude Code plugin and marketplace manifests
+.claude-plugin/         Claude Code plugin manifest (plugin.json)
 .github/workflows/      CI: runs pre-commit on every push and pull request
 ```
 

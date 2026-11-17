@@ -1,6 +1,6 @@
 {
   "name": "appsec-review",
-  "icon": "assets/asvs.png",
+  "icon": "skills/appsec-review/assets/asvs.png",
   "displayName": "OWASP Application Security Verification",
   "version": "5.0.0",
   "description": "Verify code, designs and configuration against OWASP ASVS 5.0.0 (L1-L3), with per-chapter rules and CWE references.",
