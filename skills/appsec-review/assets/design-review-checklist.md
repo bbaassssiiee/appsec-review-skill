@@ -72,4 +72,4 @@ Questions marked L2 or L3 apply only at that level or above; unmarked questions 
 ## Derived from the OWASP Application Security Verification Standard 5.0.0
 
 © 2008-2025 The OWASP Foundation, CC BY-SA 4.0. Question wording is the skill's; the
-requirement ids are the authority. Run `scripts/asvs-rules.py --id <id>` for the full text.
+requirement ids are the authority. Look up an id in `rules/asvs-v<N>-rules.yml` for the full text.
