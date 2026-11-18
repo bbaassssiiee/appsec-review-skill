@@ -190,8 +190,16 @@ pre-commit install            # run the checks on every commit
 pre-commit run --all-files    # YAML/JSON syntax, whitespace, large files
 ```
 
+The workflow also runs a consistency job: every requirement in `references/` has
+exactly one entry in `rules/`, every entry keeps the layout the search patterns in
+`SKILL.md` rely on, and the chapter table in `SKILL.md` matches the rules files. The
+check is inline in the workflow because the skill itself ships no scripts.
+
 `evals/trigger-evals.json` holds prompts that should and should not trigger the
-skill; `evals/evals.json` holds task prompts with assertions on the result.
+skill; `evals/evals.json` holds task prompts with assertions on the result. Run them
+with the `run_eval.py`/`run_loop.py` scripts from Anthropic's
+[skill-creator](https://github.com/anthropics/skills/tree/main/skills/skill-creator)
+skill, pointing `--skill-path` at `skills/appsec-review`.
 
 ## License and attribution
 
