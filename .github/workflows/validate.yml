@@ -22,3 +22,69 @@ jobs:
           key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
       - run: pip install pre-commit
       - run: pre-commit run --all-files --show-diff-on-failure
+
+  # The skill ships no scripts, so the consistency checks live here instead:
+  # every requirement in references/ has exactly one rule, every rule entry is
+  # well-formed and short enough for the grep patterns in SKILL.md, and the
+  # chapter table in SKILL.md matches the rules files.
+  consistency:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+      - name: rules match references and SKILL.md
+        shell: python
+        run: |
+          import glob, re, sys
+          S = "skills/appsec-review"
+          errors = []
+
+          # 1. requirement ids in the reference chapters vs the rules files
+          ref_ids = set()
+          for f in glob.glob(f"{S}/references/0x1*-V*.md") + glob.glob(f"{S}/references/0x2*-V*.md"):
+              ref_ids |= set(re.findall(r"\*\*(\d+\.\d+\.\d+)\*\*", open(f, encoding="utf-8").read()))
+          rule_ids, per_chapter = [], {}
+          for f in sorted(glob.glob(f"{S}/rules/asvs-v*-rules.yml")):
+              text = open(f, encoding="utf-8").read()
+              chapter = re.search(r'^  chapter: "(V\d+)"', text, re.M).group(1)
+              entries = re.split(r"(?m)^  - id: ", text.split("\nrules:\n", 1)[1])[1:]
+              counts = {1: 0, 2: 0, 3: 0}
+              for e in entries:
+                  lines = e.rstrip("\n").split("\n")
+                  m = re.match(r'"ASVS-(V\d+)-(\d+\.\d+\.\d+)"', lines[0])
+                  if not m or m.group(1) != chapter:
+                      errors.append(f"{f}: malformed id line {lines[0]!r}"); continue
+                  rid = m.group(2); rule_ids.append(rid)
+                  # 2. layout the grep patterns in SKILL.md rely on
+                  if not (lines[1].startswith("    section: ") and lines[2].startswith("    level: ") and lines[3].startswith("    rule: ")):
+                      errors.append(f"{f}: {rid} fields not in section/level/rule order")
+                  if len(lines) > 10:
+                      errors.append(f"{f}: {rid} entry is {len(lines)} lines; SKILL.md greps assume at most 10")
+                  lvl = int(re.search(r"\d", lines[2]).group())
+                  counts[lvl] += 1
+              per_chapter[chapter] = counts
+              declared = int(re.search(r"^  requirements: (\d+)", text, re.M).group(1))
+              if declared != len(entries):
+                  errors.append(f"{f}: meta says {declared} requirements, file has {len(entries)}")
+          dup = {i for i in rule_ids if rule_ids.count(i) > 1}
+          if dup: errors.append(f"duplicate rule ids: {sorted(dup)}")
+          missing, extra = ref_ids - set(rule_ids), set(rule_ids) - ref_ids
+          if missing: errors.append(f"in references but not in rules: {sorted(missing)}")
+          if extra: errors.append(f"in rules but not in references: {sorted(extra)}")
+
+          # 3. chapter table in SKILL.md
+          skill = open(f"{S}/SKILL.md", encoding="utf-8").read()
+          for ch, title, path, l1, l2, l3 in re.findall(r"^\| (V\d+) \| (.+?) \| `(rules/asvs-v\d+-rules\.yml)` \| (\d+) / (\d+) / (\d+) \|", skill, re.M):
+              want = per_chapter.get(ch)
+              if not want: errors.append(f"SKILL.md lists {ch}, no rules file"); continue
+              if (int(l1), int(l2), int(l3)) != (want[1], want[2], want[3]):
+                  errors.append(f"SKILL.md {ch}: table says {l1}/{l2}/{l3}, rules have {want[1]}/{want[2]}/{want[3]}")
+          for p in set(re.findall(r"`((?:rules|references|assets)/[^`]+)`", skill)):
+              if "<" in p: continue
+              if not glob.glob(f"{S}/{p}"): errors.append(f"SKILL.md references missing file {p}")
+
+          for e in errors: print("::error::" + e)
+          print(f"checked {len(rule_ids)} rules in {len(per_chapter)} chapters against {len(ref_ids)} reference ids")
+          sys.exit(1 if errors else 0)

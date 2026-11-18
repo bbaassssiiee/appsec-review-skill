@@ -25,7 +25,7 @@
         {"text": "Open design questions are UNVERIFIED, not FAIL", "check": "14.1.1 and 16.1.1 are UNVERIFIED (or missing evidence lists them); neither is FAIL"},
         {"text": "Session lifetime gap is found", "check": "7.1.1 is PARTIAL or UNVERIFIED and the finding mentions the absolute lifetime"},
         {"text": "Every FAIL/PARTIAL has a remediation", "check": "report contains a Findings block with Requirement/Found/Why it matters/Fix per FAIL/PARTIAL and nothing beyond the table row for a PASS"},
-        {"text": "No script execution is attempted", "check": "transcript shows no attempt to run asvs-rules.py or asvs-report.py"}
+        {"text": "No script execution is attempted", "check": "transcript shows no attempt to run a bundled script; the skill ships none"}
       ]
     },
     {
