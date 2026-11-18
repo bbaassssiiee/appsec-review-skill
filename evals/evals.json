@@ -48,7 +48,8 @@
         {"text": "True positive: hard-coded JWT secret", "check": "13.3.1 (or 11.2.3) is FAIL and its evidence cites the 'superSecret' fallback in src/app/routes/auth/auth.ts or token.utils.ts"},
         {"text": "True positive: other users' credentials in a response", "check": "15.3.1 or 8.2.3 is FAIL and its evidence cites favoriteArticle/unfavoriteArticle in src/app/routes/article/article.service.ts returning favoritedBy user records (email, password hash)"},
         {"text": "True positive: password policy and brute force", "check": "6.2.1 is FAIL citing the blank-only check in src/app/routes/auth/auth.service.ts, and 6.3.1 is FAIL citing the absence of throttling on login"},
-        {"text": "True negative: injection and route authentication", "check": "1.2.4 is PASS citing the Prisma query builder with no raw queries, and 8.2.1 is PASS citing auth.required on the mutating article, comment, profile and user routes"},
+        {"text": "True negative: injection and route authentication", "check": "1.2.4 is not FAIL: its evidence cites the Prisma query builder with no raw queries (PASS, or PARTIAL only for query objects reaching Prisma filters), and 8.2.1 is PASS citing auth.required on the mutating article, comment, profile and user routes"},
+        {"text": "Inventory facts are right", "check": "the inventory does not claim a non-root container: the Dockerfile creates the api user but has no USER instruction, so the process runs as root"},
         {"text": "Failures are explained and fixable", "check": "every FAIL and PARTIAL has a Findings entry whose Why it matters line names what an attacker gains in this application, and whose Fix line names a file or config key"}
       ]
     },
