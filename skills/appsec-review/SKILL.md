@@ -60,6 +60,8 @@ Every rule entry is at most ten lines and starts with its `id` line, followed by
    grep -B1 -A8 'section: "V6.2"' rules/asvs-v6-rules.yml
    ```
 
+   An entry without a `cwe` block is only four lines, so the context after the last match can run into the next section. Ignore any entry whose `section` line is not the one you searched for.
+
 3. **Specific requirements.** Search for the id with nine lines after:
 
    ```sh
@@ -76,7 +78,7 @@ Use your own search tool with the same pattern and context when you have one; th
 
 There is no level filter: read the `level` field of each entry and drop the ones above the target level. Checking at level N means keeping every rule with `level` ≤ N.
 
-A chapter file under about 150 lines (V2, V8, V9, V12, V14, V17) can be read whole when most of its sections apply.
+A short chapter without a documentation section (V9, V12, V17) can be read whole when most of its sections apply. For the other short ones (V2, V8, V14) search by section, so the documentation section stays out of a code review.
 
 ## Chapters
 
@@ -153,7 +155,6 @@ Chapters are coarse; most of their sections only apply when a specific feature e
 
 | Feature in the inventory | Sections that apply only then |
 |---|---|
-| Database or query language access | V1.2 (query-related rules) |
 | Rich-text or HTML input, templates, dynamic code evaluation | V1.3 |
 | Memory-unsafe language or unmanaged code | V1.4 |
 | Deserialization of untrusted data | V1.5 |
@@ -163,7 +164,7 @@ Chapters are coarse; most of their sections only apply when a specific feature e
 | Third-party scripts or CDN resources | V3.6 |
 | GraphQL | V4.3 |
 | WebSocket | V4.4 |
-| File upload | V5.1, V5.2, V5.3 |
+| File upload | V5.2, V5.3 |
 | File download or serving user-supplied files | V5.4 |
 | Passwords | V6.2 |
 | Credential recovery, factor enrolment or reset | V6.4 |
@@ -180,8 +181,8 @@ Chapters are coarse; most of their sections only apply when a specific feature e
 | Data processed in memory on untrusted hosts, confidential computing | V11.7 |
 | Service-to-service calls, backend integrations | V12.3, V13.2 |
 | Secrets (API keys, credentials) held by the application | V13.3 |
-| Data stored or cached on the client | V14.3 |
-| Third-party dependencies | V15.1 (dependency rules), V15.2 |
+| A browser or other client that stores or caches what the application sends | V14.3 |
+| Third-party dependencies | V15.2 |
 | Concurrency, shared state, background jobs | V15.4 |
 | WebRTC | V17.1, V17.2, V17.3 |
 
@@ -189,14 +190,15 @@ The *Documentation* sections (V2.1, V3.1, V5.1, V6.1, V7.1, V8.1, V11.1, V13.1, 
 
 - **In a code review** without design documentation in scope, don't load the rules of these sections and don't give them table rows. Name the sections once on the `Sections UNVERIFIED` line of the report with the reason, and say under *Missing evidence* which documents would settle them. They are not counted in the summary. Twenty rows that each say "no documentation in scope" tell the reader nothing the one line doesn't.
 - **When documentation is in scope** (a design document, an ADR, a security section in the README that actually states the decisions), judge these rules like any other and cite the document.
+- **When the repository itself holds what one of these rules asks for** (an SBOM or lockfile for the component inventory in 15.1.2, a `SECURITY.md` with remediation time frames for 15.1.1), give that one rule its own row and leave the rest of the section on the `Sections UNVERIFIED` line.
 - **In a design review** they are the main content: use `assets/design-review-checklist.md`.
 
 ## Procedure
 
-1. **Scope**: decide what is being verified (repository, directory, diff or PR, design document, or configuration) and the target level. Size it before you start: see *Sizing the review* below.
+1. **Scope**: decide what is being verified (repository, directory, diff or PR, design document, or configuration) and the target level. See *Sizing the review* below for what to tell the user once you know how large it is.
 2. **Inventory** the scope before touching any rules. List the security-relevant features, not the technology stack: entry points (web UI, REST/GraphQL, WebSocket), authentication mechanisms (password, MFA, OAuth/OIDC, SSO), token formats (JWT, opaque sessions), file upload/download, crypto usage, external services, build and deploy configuration. A few searches (`grep`, dependency manifests, route definitions, config files) are enough. Recognizing what a given language or framework does for each feature is left to you; the skill carries no stack-specific knowledge. Write the inventory down in one short list; it drives the next two steps and goes in the report.
 3. **Route**: pick the chapters using the tables above.
-4. **Triage by section**: read the `meta` block of each routed chapter's rules file and decide per section whether it applies to the inventory. Sections for features that aren't there (for example V6.6 Out-of-Band when there is no OOB authentication, V6.7 when there are no cryptographic authenticators, V5.x archive handling when nothing extracts archives) become `N/A` as a whole, with the reason, and their rules are never loaded. Only the remaining sections go to the next step.
+4. **Triage by section**: read the `meta` block of each routed chapter's rules file and decide per section whether it applies to the inventory. Sections for features that aren't there (for example V6.6 Out-of-Band when there is no OOB authentication, V6.7 when there are no cryptographic authenticators, V5.x archive handling when nothing extracts archives) become `N/A` as a whole, with the reason, and their rules are never loaded. A section whose rules are all above the target level also goes on the `Sections N/A` line, with "L3 only" as the reason. Only the remaining sections go to the next step.
 5. **Load the rules** for the remaining sections by searching on the section id, and drop the entries above the target level. Open the reference chapter only for requirements whose intent is unclear.
 6. **Collect evidence**: for each rule, search the code, configuration, tests, pipeline definitions, and docs. Cite concrete locations (`path:line`), test names, or config keys.
 7. **Judge** each rule:
@@ -205,8 +207,12 @@ The *Documentation* sections (V2.1, V3.1, V5.1, V6.1, V7.1, V8.1, V11.1, V13.1, 
    - `PARTIAL`: met in some places but not all.
    - `N/A`: the feature doesn't exist in scope. Give the reason.
    - `UNVERIFIED`: can't be decided from the available material. Say what evidence is missing.
+
+   Two situations come up in almost every repository review:
+   - *A control is absent altogether* (no logging, no rate limiting). `FAIL` the rules that require it to exist, and mark the rules about its properties (log format, log protection) `N/A` with a pointer to that `FAIL`. Failing every one of them says the same thing ten times.
+   - *The control could live in infrastructure that is not in scope* (a reverse proxy, an ingress, a CDN). If the application could implement it itself and doesn't, as with response headers, cache directives or CORS, judge it on the code: `FAIL`, and note under *Missing evidence* that the edge configuration would change the verdict. If only infrastructure can implement it, as with TLS versions, cipher suites and certificates, it is `UNVERIFIED`.
 8. **Explain and remediate** every `FAIL` and `PARTIAL`. This is where the review earns its keep, so spend the words here and not on passes:
-   - *Why it matters*: what an attacker gains from this gap in this application, in one or two sentences. The CWE mapped to the rule gives the weakness class and its typical consequence; add the application-specific part (which data, which users, which entry point). Readers learn security from this line; make it concrete rather than generic.
+   - *Why it matters*: what an attacker gains from this gap in this application, in one or two sentences. The CWE mapped to the rule gives the weakness class and its typical consequence; add the application-specific part (which data, which users, which entry point). The mappings are indicative: when the `note` describes something other than this finding, or runs to a paragraph, keep the CWE link and name and write the consequence yourself. Readers learn security from this line; make it concrete rather than generic.
    - *Fix*: what to change and where. Name the file or config key and the concrete target (a value, a library call, a header), not a restatement of the requirement. If the fix is a design decision rather than a code change, say who has to make it.
    A `PASS` gets its one line of evidence in the table and nothing more.
 9. **Report** as below.
@@ -221,7 +227,7 @@ The cost of a review follows the number of rules judged, not the size of the cod
 
 When the request is the whole repository, do it, but make the size visible and keep the result usable:
 
-- Say in your first line which chapters you routed to and roughly how many rules that is, so the user can narrow the scope before the work is done rather than after.
+- Once triage is done and before you load any rules, tell the user which chapters you routed to and roughly how many rules remain (the `per_level` counts in the `meta` blocks give an upper bound), so they can narrow the scope before the work is done rather than after. Then carry on; don't wait for an answer unless they asked to be consulted.
 - Work through the L1 rules of every routed section first, then L2, then L3. If the review has to stop early, the most important part is complete, and the report says which levels were covered.
 - If the user asked an open question ("is this app secure?") rather than for a full verification, offer the narrower forms: L1 only, one feature (authentication, file upload), or the chapters behind the top risks you see in the inventory.
 
@@ -276,7 +282,7 @@ Missing evidence
 - ...
 ```
 
-The table is the overview; a `PASS` lives only there, with its evidence. The Findings block is the substance: one entry per `FAIL` and `PARTIAL` with the requirement, what was found, why it matters and the fix. Order the entries by level and then by id, so the L1 failures come first.
+The table is the overview; a `PASS` lives only there, with its evidence. For a `FAIL` or `PARTIAL` the table cell can be a one-line version of what the `Found:` line says in full. The Findings block is the substance: one entry per `FAIL` and `PARTIAL` with the requirement, what was found, why it matters and the fix. Order the entries by level and then by id, so the L1 failures come first.
 
 In the CWE column, write each CWE as a Markdown link to its MITRE page: `CWE-<ID>` links to `https://cwe.mitre.org/data/definitions/<ID>.html`, where `<ID>` is the number only (so `CWE-78` becomes `[CWE-78](https://cwe.mitre.org/data/definitions/78.html)`). Separate multiple CWEs with a comma, and leave the cell empty when there is no mapping.
 
