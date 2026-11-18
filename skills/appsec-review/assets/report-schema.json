@@ -13,6 +13,7 @@
     "chapters": {"type": "array", "items": {"type": "string", "pattern": "^V([1-9]|1[0-7])$"}, "description": "Chapters that were verified."},
     "skipped_chapters": {"type": "object", "additionalProperties": {"type": "string"}, "description": "Chapter id -> reason it was not verified."},
     "sections_na": {"type": "object", "additionalProperties": {"type": "string"}, "description": "Section id -> reason the whole section is not applicable. Its rules are not listed in findings."},
+    "sections_unverified": {"type": "object", "additionalProperties": {"type": "string"}, "description": "Section id -> reason the whole section could not be verified, typically a documentation section when no design documentation is in scope. Its rules are not listed in findings."},
     "findings": {
       "type": "array",
       "minItems": 1,
