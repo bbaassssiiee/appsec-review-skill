@@ -180,6 +180,26 @@ evals/                  trigger and task evals for the skill
 opencode.json           registers ./skills for OpenCode
 ```
 
+## Versioning
+
+The skill's version follows the ASVS release it implements:
+
+| Part | Meaning | Example |
+|---|---|---|
+| `major.minor` | The ASVS version whose requirements are in `rules/` and `references/` | `5.0` = ASVS 5.0.0 |
+| `patch` | Revision of the skill itself: instructions, routing, checklist, report format | `5.0.1` |
+
+So `5.0.1` means "ASVS 5.0.0, second revision of the skill". A new ASVS release becomes a
+new `major.minor` and resets the patch to `0`; ASVS point releases that only change
+wording (5.0.0 → 5.0.1 upstream) still bump the skill's patch, with the exact upstream
+version named in `meta.standard` of each rules file and in the `Attribution` section of
+`SKILL.md`. Skill changes never bump `major.minor`, however large; the ASVS version is
+what the user needs to know when reading a report that cites `v5.0.0-6.2.1`.
+
+The version is kept in two places and they must agree: `.claude-plugin/plugin.json`
+(`version`) and `skills/appsec-review/SKILL.md` (`version` in the frontmatter). CI
+checks that they match.
+
 ## Contributing
 
 Validation runs through [pre-commit](https://pre-commit.com), locally and in GitHub

@@ -85,6 +85,15 @@ jobs:
               if "<" in p: continue
               if not glob.glob(f"{S}/{p}"): errors.append(f"SKILL.md references missing file {p}")
 
+          # 4. version in plugin.json and SKILL.md agree and follow <asvs-major>.<asvs-minor>.<skill-patch>
+          import json
+          pv = json.load(open(".claude-plugin/plugin.json"))["version"]
+          sv = re.search(r"^version:\s*(\S+)", skill, re.M).group(1)
+          if pv != sv: errors.append(f"version mismatch: plugin.json {pv}, SKILL.md {sv}")
+          std = re.search(r'^  standard: "OWASP ASVS (\d+)\.(\d+)\.\d+"', open(f"{S}/rules/asvs-v1-rules.yml", encoding="utf-8").read(), re.M)
+          if not re.fullmatch(r"\d+\.\d+\.\d+", pv) or pv.split(".")[:2] != [std.group(1), std.group(2)]:
+              errors.append(f"version {pv} does not start with the ASVS major.minor {std.group(1)}.{std.group(2)} (see README, Versioning)")
+
           for e in errors: print("::error::" + e)
           print(f"checked {len(rule_ids)} rules in {len(per_chapter)} chapters against {len(ref_ids)} reference ids")
           sys.exit(1 if errors else 0)
