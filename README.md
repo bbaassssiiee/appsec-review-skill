@@ -109,6 +109,10 @@ You can also scope by SDLC phase ("what applies at build time?") or by topic
    by a `path:line`, test name or config key. No `PASS` without evidence.
 6. **Report** — see below.
 
+A whole application at L2 means 100 to 150 requirements and a long report. The agent
+says so up front and works L1 first; ask for one feature, one chapter, a pull request
+or L1 only when that is what you need.
+
 ### The report
 
 ```markdown
@@ -116,6 +120,7 @@ ASVS 5.0.0 verification: src/auth, target L2
 Inventory: web UI + REST API, password login with TOTP, opaque server-side sessions
 Chapters: V6, V7, V8 (skipped: V17 no WebRTC)
 Sections N/A: V6.6 (no out-of-band auth), V6.7 (no cryptographic authenticators)
+Sections UNVERIFIED: V6.1, V7.1, V8.1 (design documentation not in scope)
 
 | Requirement | L | Status | Evidence / finding | CWE |
 |---|---|---|---|---|
@@ -196,7 +201,12 @@ exactly one entry in `rules/`, every entry keeps the layout the search patterns 
 check is inline in the workflow because the skill itself ships no scripts.
 
 `evals/trigger-evals.json` holds prompts that should and should not trigger the
-skill; `evals/evals.json` holds task prompts with assertions on the result. Run them
+skill; `evals/evals.json` holds task prompts with assertions on the result. Eval 3
+has a `fixture`: a public repository pinned to a commit, with assertions that name
+findings a correct review must report (true positives) and rules it must pass (true
+negatives), so the eval measures whether the review is right and not only whether the
+report is well-formed. Clone the fixture at that commit and run the prompt from its
+root. Run them
 with the `run_eval.py`/`run_loop.py` scripts from Anthropic's
 [skill-creator](https://github.com/anthropics/skills/tree/main/skills/skill-creator)
 skill, pointing `--skill-path` at `skills/appsec-review`.

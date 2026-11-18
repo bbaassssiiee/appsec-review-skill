@@ -74,6 +74,22 @@ jobs:
           if missing: errors.append(f"in references but not in rules: {sorted(missing)}")
           if extra: errors.append(f"in rules but not in references: {sorted(extra)}")
 
+          # 2b. the documentation-section list in SKILL.md is exactly the sections titled "... Documentation"
+          doc_sections = set()
+          for f in glob.glob(f"{S}/rules/asvs-v*-rules.yml"):
+              meta = open(f, encoding="utf-8").read().split("\nrules:\n", 1)[0]
+              doc_sections |= {i for i, t in re.findall(r'- id: "(V\d+\.\d+)"\n\s+title: "([^"]*)"', meta) if "Documentation" in t}
+          m = re.search(r"The \*Documentation\* sections \(([^)]*)\)", open(f"{S}/SKILL.md", encoding="utf-8").read())
+          listed = set(re.findall(r"V\d+\.\d+", m.group(1))) if m else set()
+          if listed != doc_sections:
+              errors.append(f"SKILL.md documentation sections {sorted(listed)} != rules meta {sorted(doc_sections)}")
+
+          # 2c. requirement ids named in the evals and the design checklist exist
+          known = set(rule_ids)
+          for f in ("evals/evals.json", f"{S}/assets/design-review-checklist.md"):
+              for i in set(re.findall(r"(?<![\d.])(\d{1,2}\.\d{1,2}\.\d{1,2})(?![\d.])", open(f, encoding="utf-8").read())) - {"5.0.0"}:
+                  if i not in known: errors.append(f"{f}: unknown requirement id {i}")
+
           # 3. chapter table in SKILL.md
           skill = open(f"{S}/SKILL.md", encoding="utf-8").read()
           for ch, title, path, l1, l2, l3 in re.findall(r"^\| (V\d+) \| (.+?) \| `(rules/asvs-v\d+-rules\.yml)` \| (\d+) / (\d+) / (\d+) \|", skill, re.M):

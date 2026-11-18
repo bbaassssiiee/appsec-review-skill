@@ -11,7 +11,8 @@
         {"text": "Requirement ids use the v5.0.0-x.y.z notation", "check": "ids like v5.0.0-9.1.1 appear; no ASVS-V9-9.1.1 ids"},
         {"text": "Only the token-related requirements are listed", "check": "ids are from V9 and V10.3; no V6 password rules"},
         {"text": "No L3 rules at L2", "check": "every listed id has level <= 2 in rules/asvs-v<N>-rules.yml"},
-        {"text": "Rules were found by searching, not by loading unrelated chapters", "check": "transcript shows a keyword or section search over rules/, or a read of rules/asvs-v9-rules.yml and rules/asvs-v10-rules.yml only; no other chapter read whole"}
+        {"text": "Rules were found by searching, not by loading unrelated chapters", "check": "transcript shows a keyword or section search over rules/, or a read of rules/asvs-v9-rules.yml and rules/asvs-v10-rules.yml only; no other chapter read whole"},
+        {"text": "The answer uses the short form", "check": "no report header, no status table and no Findings block; a list of requirement ids with level and a one-line summary each"}
       ]
     },
     {
@@ -30,17 +31,25 @@
     },
     {
       "id": 3,
-      "name": "code-review-auth-directory",
-      "prompt": "Do an ASVS L2 verification of the authentication code in this repository (look under the auth or login directory). Report what passes and what fails, with file references.",
-      "expected_output": "Inventory line, chapters V6 and V7 (V8 if authorization code is adjacent), sections N/A for absent authenticators, a findings table with path:line evidence, computed summary, remediation per FAIL/PARTIAL. Needs a target repository: run against any codebase with a login flow.",
+      "name": "code-review-realworld-api",
+      "fixture": {"repository": "https://github.com/gothinkster/node-express-realworld-example-app", "commit": "30b68e1e881462b2f4164ea09ab4c4f5699c7b0b", "note": "Clone at this commit and run the prompt from the repository root. Static review only: no install, no execution."},
+      "prompt": "Do an ASVS L2 verification of the API in this repository (Express + Prisma + JWT). Report what passes and what fails, with file references.",
+      "expected_output": "Inventory line (REST API, password login, HS256 JWT in the Authorization header, no cookies, no OAuth, no upload). Chapters skipped: V5, V10, V17. Sections N/A include V6.5-V6.8 and V4.3/V4.4. Documentation sections on one Sections UNVERIFIED line, not as rows. FAIL on the hard-coded JWT secret fallback, on the favorite/unfavorite response that returns other users' email and password hash, on the missing password minimum and on missing brute-force protection; PASS on query parameterization and on authentication of the mutating routes. Each FAIL has a Findings entry with why and fix.",
       "files": [],
       "assertions": [
         {"text": "Inventory precedes rule loading", "check": "transcript shows searches of the target repository (grep/glob/manifest reads) before the first search of rules/ that returns rule text"},
         {"text": "Triage happened per section", "check": "transcript reads the meta block of the routed rules files before loading rule text, and the report has a Sections N/A line"},
         {"text": "Whole chapters were not loaded", "check": "no full Read of rules/asvs-v6-rules.yml; rule text comes from section or id searches with context"},
+        {"text": "Rules of N/A sections never reach the table", "check": "the table has no row from V5, V10, V17 or from V6.5, V6.6, V6.7, V6.8; those appear only on the Chapters (skipped) and Sections N/A lines"},
+        {"text": "Documentation sections are not listed rule by rule", "check": "the report has a Sections UNVERIFIED line naming documentation sections (for example V6.1, V7.1, V8.1); the table has no rows for 6.1.x, 7.1.x, 8.1.x, 14.1.x or 16.1.x"},
         {"text": "Every PASS has concrete evidence", "check": "each PASS row cites a path:line, test name or config key"},
-        {"text": "Summary counts match the table", "check": "counts in the Summary line equal the row counts per status"},
-        {"text": "Rule data comes from the rules files", "check": "every id in the table exists in rules/, and its level and CWE match the rule entry"}
+        {"text": "Summary counts match the table", "check": "counts in the Summary line equal the rules covered per status, counting a merged N/A row as the number of rules in its range"},
+        {"text": "Rule data comes from the rules files", "check": "every id in the table exists in rules/, and its level and CWE match the rule entry"},
+        {"text": "True positive: hard-coded JWT secret", "check": "13.3.1 (or 11.2.3) is FAIL and its evidence cites the 'superSecret' fallback in src/app/routes/auth/auth.ts or token.utils.ts"},
+        {"text": "True positive: other users' credentials in a response", "check": "15.3.1 or 8.2.3 is FAIL and its evidence cites favoriteArticle/unfavoriteArticle in src/app/routes/article/article.service.ts returning favoritedBy user records (email, password hash)"},
+        {"text": "True positive: password policy and brute force", "check": "6.2.1 is FAIL citing the blank-only check in src/app/routes/auth/auth.service.ts, and 6.3.1 is FAIL citing the absence of throttling on login"},
+        {"text": "True negative: injection and route authentication", "check": "1.2.4 is PASS citing the Prisma query builder with no raw queries, and 8.2.1 is PASS citing auth.required on the mutating article, comment, profile and user routes"},
+        {"text": "Failures are explained and fixable", "check": "every FAIL and PARTIAL has a Findings entry whose Why it matters line names what an attacker gains in this application, and whose Fix line names a file or config key"}
       ]
     },
     {
@@ -53,7 +62,8 @@
         {"text": "Scope is the diff", "check": "report scope names the branch/PR and states that unchanged code is out of scope"},
         {"text": "Recovery section is covered", "check": "findings include V6.4 ids (e.g. 6.4.1, 6.4.2)"},
         {"text": "Unrelated sections are not listed rule by rule", "check": "no V6.5/V6.6/V6.7/V6.8 rows in the table; they appear only in Sections N/A or not at all"},
-        {"text": "Each finding explains why and names the file", "check": "every Findings entry has a Why it matters line that goes beyond the CWE boilerplate and a Fix line that references a path or config key"}
+        {"text": "Each finding explains why and names the file", "check": "every Findings entry has a Why it matters line that goes beyond the CWE boilerplate and a Fix line that references a path or config key"},
+        {"text": "Out-of-scope code is stated, not enumerated", "check": "the header says in one line that code the diff does not touch is out of scope; no rows marked UNVERIFIED or N/A for unchanged code"}
       ]
     }
   ]
